@@ -1,0 +1,24 @@
+{
+    "title": "Biblioteca Pública de PDFs",
+    "description": "Colección de documentos disponibles públicamente",
+    "owner": "TorreTek",
+    "source": "google-drive",
+    "visibility": "public",
+    "version": "1.0.0",
+    "updatedAt": "2026-01-13T18:30:00Z",
+    "pdfs": [
+        {
+            "id": "js-basico",
+            "name": "JavaScript Básico",
+            "description": "Fundamentos de JavaScript para principiantes",
+            "url": "https://drive.google.com/file/d/1AmbboOomJquFSxcv8OXk7CuCak7bvg1q/view?usp=drive_link",
+            "image_path": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnxYKqZmneNgh2hDd-nMr0ji1rNlxVAFSbsg&s",
+            "category": "Programación",
+            "tags": [
+                "javascript",
+                "frontend",
+                "basico"
+            ]
+        }
+    ]
+}
