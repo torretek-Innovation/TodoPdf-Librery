@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
@@ -33,4 +34,13 @@ export function getUserFromRequest(request: NextRequest): number | null {
     } catch (error) {
         return null;
     }
+}
+
+export async function hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    return bcrypt.hash(password, salt);
+}
+
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
 }
