@@ -89,14 +89,15 @@ export default function Dashboard({ userName }: DashboardProps) {
                 if (selectedPdf?.id === pdfId) {
                     handleClosePdf();
                 }
+                showToast('Libro eliminado correctamente', 'success');
             } else {
                 const error = await response.json();
                 console.error('Error eliminando PDF:', error);
-                alert('No se pudo eliminar el PDF');
+                showToast(error.message || 'No se pudo eliminar el PDF', 'error');
             }
         } catch (error) {
             console.error('Error eliminando PDF:', error);
-            alert('Error de conexión');
+            showToast('Error de conexión al eliminar', 'error');
         }
     };
 
@@ -311,7 +312,16 @@ export default function Dashboard({ userName }: DashboardProps) {
             <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header userName={userName} onPdfUploaded={handlePdfUploaded} />
+                <Header
+                    userName={userName}
+                    onPdfUploaded={handlePdfUploaded}
+                    onNavigate={(tab) => {
+                        setActiveTab(tab);
+                        // Reset filters when navigating via header
+                        setSelectedCategory(null);
+                        setFilterCategory(null);
+                    }}
+                />
 
 
                 <main className="flex-1 overflow-y-auto p-6">

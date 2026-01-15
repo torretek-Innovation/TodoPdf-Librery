@@ -1,21 +1,80 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { CiSettings } from 'react-icons/ci';
-import { FiSearch, FiBell, FiUser, FiLogOut, FiUpload, FiFolder, FiCheckCircle, FiAlertTriangle, FiLoader, FiX } from 'react-icons/fi';
-
+import { FiSearch, FiBell, FiUser, FiLogOut, FiUpload, FiFolder, FiCheckCircle, FiAlertTriangle, FiLoader, FiX, FiFileText, FiHome, FiStar, FiGrid, FiCompass } from 'react-icons/fi';
+import { AnimatePresence, motion } from 'framer-motion';
+import NotificationsDropdown, { Notification } from './NotificationsDropdown';
+import { useToast } from '../providers/ToastProvider';
 
 interface HeaderProps {
     userName: string;
     onPdfUploaded?: (pdf: any) => void;
+    onNavigate: (tab: string) => void;
 }
 
 
 
 
-export default function Header({ userName, onPdfUploaded }: HeaderProps) {
+export default function Header({ userName, onPdfUploaded, onNavigate }: HeaderProps) {
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const { showToast, notifications, markAsRead, clearNotifications, unreadCount } = useToast();
+
+    // Search State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [showSearchResults, setShowSearchResults] = useState(false);
+
+    // System Modules Definition
+    const systemModules = [
+        { id: 'home', title: 'Inicio / Home', keywords: ['home', 'inicio', 'casa', 'principal'], icon: FiHome, tab: 'home' },
+        { id: 'favorites', title: 'Favoritos', keywords: ['favoritos', 'destacados', 'estrellas', 'likes'], icon: FiStar, tab: 'favorites' },
+        { id: 'folders', title: 'Carpetas', keywords: ['carpetas', 'directorios', 'archivos', 'organizar'], icon: FiFolder, tab: 'folders' },
+        { id: 'explore', title: 'Explorar / Librería', keywords: ['explorar', 'libreria', 'buscar', 'web'], icon: FiCompass, tab: 'explore' },
+        { id: 'pdfs', title: 'Todos los PDFs', keywords: ['pdfs', 'todos', 'lista', 'documentos'], icon: FiGrid, tab: 'pdfs' },
+    ];
+
+    // Repos
     const menuRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLDivElement>(null);
+    const notifRef = useRef<HTMLDivElement>(null);
+
+    // Filter results as user types for System Navigation
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+        const term = searchTerm.toLowerCase();
+
+        const results = systemModules.filter(module =>
+            module.title.toLowerCase().includes(term) ||
+            module.keywords.some(k => k.includes(term))
+        );
+
+        setSearchResults(results);
+    }, [searchTerm]);
+
+    // Click outside to close menus
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowUserMenu(false);
+            }
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowSearchResults(false);
+            }
+            if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+                setShowNotifications(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+
+
     const [importStatus, setImportStatus] = useState<{
         state: 'idle' | 'uploading' | 'completed';
         progress: { current: number; total: number; currentFile: string };
@@ -66,6 +125,12 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
                 state: 'completed',
                 errors: newErrors
             }));
+
+            if (newErrors.length > 0) {
+                showToast(`Importación con ${newErrors.length} errores`, 'warning');
+            } else {
+                showToast(`Se importaron ${files.length} archivos correctamente`, 'success');
+            }
         };
 
         input.click();
@@ -91,7 +156,7 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
             );
 
             if (pdfFiles.length === 0) {
-                alert('No se encontraron archivos PDF en la carpeta seleccionada');
+                showToast('No se encontraron archivos PDF en la carpeta', 'warning');
                 return;
             }
 
@@ -127,6 +192,12 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
                 state: 'completed',
                 errors: newErrors
             }));
+
+            if (newErrors.length > 0) {
+                showToast(`Carpeta importada con ${newErrors.length} errores`, 'warning');
+            } else {
+                showToast(`Carpeta importada: ${pdfFiles.length} archivos`, 'success');
+            }
         };
 
         input.click();
@@ -192,6 +263,8 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
             throw error;
         }
     };
+    // Old useEffect replaced by global one above
+    /* 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -205,6 +278,7 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showUserMenu]);
+    */
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -243,15 +317,66 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
                     </button>
                 </div>
                 {/* Search Bar */}
-                <div className="flex-1 max-w-md">
-                    <div className="relative">
-                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <div className="flex-1 max-w-md mx-6 relative" ref={searchRef}>
+                    <div className="relative group">
+                        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF] transition-colors" size={18} />
                         <input
                             type="text"
-                            placeholder="Search"
-                            className="w-full pl-11 pr-4 py-2.5 bg-gray-100 border-none text-gray-800 rounded-lg focus:ring-2 focus:ring-[#4F6FFF] focus:bg-white outline-none transition-all placeholder-gray-400 text-sm"
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setShowSearchResults(true);
+                            }}
+                            onFocus={() => setShowSearchResults(true)}
+                            placeholder="Buscar módulo (ej: Favoritos, Carpetas...)"
+                            className="w-full pl-11 pr-4 py-2.5 bg-gray-100/50 border border-transparent text-gray-800 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/20 focus:bg-white focus:border-[#4F6FFF] outline-none transition-all placeholder-gray-400 text-sm"
                         />
+                        {/* Keyboard shortcut hint could go here */}
                     </div>
+
+                    {/* Quick Results Dropdown */}
+                    <AnimatePresence>
+                        {showSearchResults && searchTerm && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 p-2"
+                            >
+                                <p className="text-xs font-semibold text-gray-400 px-3 py-2 uppercase tracking-wider">
+                                    Navegación del Sistema
+                                </p>
+                                {searchResults.length > 0 ? (
+                                    <ul className="space-y-1">
+                                        {searchResults.map((module) => (
+                                            <li key={module.id}>
+                                                <button
+                                                    onClick={() => {
+                                                        onNavigate(module.tab);
+                                                        setShowSearchResults(false);
+                                                        setSearchTerm('');
+                                                    }}
+                                                    className="w-full text-left px-3 py-2 hover:bg-purple-50 rounded-lg flex items-center gap-3 transition-colors group"
+                                                >
+                                                    <div className="p-2 bg-gray-100 text-gray-500 rounded-lg group-hover:bg-purple-200 group-hover:text-purple-600 transition-colors">
+                                                        <module.icon size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{module.title}</p>
+                                                        <p className="text-xs text-gray-400">Ir a {module.title}</p>
+                                                    </div>
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <div className="text-center py-6 text-gray-400">
+                                        <p>No se encontraron módulos</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Date and User Section */}
@@ -262,10 +387,28 @@ export default function Header({ userName, onPdfUploaded }: HeaderProps) {
                     </div>
 
                     {/* Notifications */}
-                    <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <FiBell size={20} />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
+                    <div className="relative" ref={notifRef}>
+                        <button
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className={`relative p-2.5 rounded-xl transition-all ${showNotifications ? 'bg-purple-100 text-purple-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                                }`}
+                        >
+                            <FiBell size={20} />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                            )}
+                        </button>
+                        <AnimatePresence>
+                            {showNotifications && (
+                                <NotificationsDropdown
+                                    notifications={notifications}
+                                    onMarkAsRead={markAsRead}
+                                    onClearAll={clearNotifications}
+                                    onClose={() => setShowNotifications(false)}
+                                />
+                            )}
+                        </AnimatePresence>
+                    </div>
 
                     {/* User Profile */}
                     <div ref={menuRef} className="relative">
