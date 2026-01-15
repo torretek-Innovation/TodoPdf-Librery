@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { FiX, FiPlus, FiTrash2, FiDownload, FiInfo } from 'react-icons/fi';
+import { useRef, useState } from 'react';
+import { FiX, FiPlus, FiTrash2, FiDownload, FiInfo, FiUpload } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
 
 interface ExplorePDF {
@@ -24,7 +24,40 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
         visibility: 'public',
         version: '1.0.0'
     });
+
     const [pdfs, setPdfs] = useState<Partial<ExplorePDF>[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const json = JSON.parse(text);
+
+            if (!Array.isArray(json.pdfs)) {
+                throw new Error('Formato de JSON inválido: falta el arreglo "pdfs"');
+            }
+
+            setFormData({
+                title: json.title || '',
+                description: json.description || '',
+                owner: json.owner || '',
+                source: json.source || 'google-drive',
+                visibility: json.visibility || 'public',
+                version: json.version || '1.0.0'
+            });
+
+            setPdfs(json.pdfs);
+            showToast('JSON cargado para editar', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast('Error al leer el archivo JSON', 'error');
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     const addPDF = () => {
         setPdfs([...pdfs, {
@@ -77,6 +110,23 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                             <h2 className="text-2xl font-bold mb-2">✨ Crear Diccionario de PDFs</h2>
                             <p className="text-purple-100 text-sm">Crea tu propio índice JSON para compartir con otros</p>
                         </div>
+                        <p className="text-purple-100 text-sm">Crea tu propio índice JSON para compartir con otros</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".json"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="p-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                            title="Importar JSON existente"
+                        >
+                            <FiUpload size={18} /> <span className="hidden sm:inline">Importar JSON</span>
+                        </button>
                         <button
                             onClick={onClose}
                             className="p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -202,6 +252,16 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                                                     onChange={(e) => updatePDF(index, 'image_path', e.target.value)}
                                                     className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                                                     placeholder="https://drive.google.com/uc?export=view&id=IMAGE_ID"
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">Descripción del PDF</label>
+                                                <textarea
+                                                    value={pdf.description || ''}
+                                                    onChange={(e) => updatePDF(index, 'description', e.target.value)}
+                                                    className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none resize-none"
+                                                    rows={2}
+                                                    placeholder="Breve descripción del documento..."
                                                 />
                                             </div>
                                             <div>

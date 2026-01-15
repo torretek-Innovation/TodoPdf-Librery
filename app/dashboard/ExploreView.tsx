@@ -5,6 +5,7 @@ import { FiSearch, FiExternalLink, FiDownload, FiAlertCircle, FiLoader, FiTrash2
 import dynamic from 'next/dynamic';
 import { useToast } from '../providers/ToastProvider';
 import CreateJSONModal from './CreateJSONModal';
+import PDFFilterNav from './PDFFilterNav';
 
 const PDFViewer = dynamic(() => import('./PDFViewer'), { ssr: false });
 
@@ -49,6 +50,11 @@ export default function ExploreView() {
     const [isImporting, setIsImporting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { showToast } = useToast();
+
+    // Local Filter State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('name_asc');
+    const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
     // Load saved libraries from database
     useEffect(() => {
@@ -387,6 +393,7 @@ export default function ExploreView() {
             {/* Results */}
             {data && (
                 <div className="animate-fade-in">
+                    {/* Header Info */}
                     <div className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-2xl border border-purple-100">
                         <div className="flex justify-between items-start">
                             <div>
@@ -409,60 +416,93 @@ export default function ExploreView() {
                         )}
                     </div>
 
+                    {/* Filter Nav */}
+                    <PDFFilterNav
+                        categories={Array.from(new Set(data.pdfs.map(p => p.category).filter(Boolean) as string[]))}
+                        selectedCategory={filterCategory}
+                        onSelectCategory={setFilterCategory}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        sortBy={sortBy}
+                        onSortChange={setSortBy}
+                        customSortOptions={[
+                            { value: 'name_asc', label: 'Nombre (A-Z)' },
+                            { value: 'name_desc', label: 'Nombre (Z-A)' },
+                        ]}
+                    />
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {data.pdfs.map((pdf) => (
-                            <div
-                                key={pdf.id}
-                                className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-purple-200 transition-all group flex flex-col h-full"
-                            >
+                        {data.pdfs
+                            .filter(pdf => {
+                                // Search
+                                if (searchTerm) {
+                                    const term = searchTerm.toLowerCase();
+                                    const matchesName = pdf.name.toLowerCase().includes(term);
+                                    const matchesCat = pdf.category?.toLowerCase().includes(term);
+                                    const matchesTags = pdf.tags?.some(tag => tag.toLowerCase().includes(term));
+                                    if (!matchesName && !matchesCat && !matchesTags) return false;
+                                }
+                                // Category
+                                if (filterCategory && pdf.category !== filterCategory) return false;
+                                return true;
+                            })
+                            .sort((a, b) => {
+                                if (sortBy === 'name_desc') return b.name.localeCompare(a.name);
+                                return a.name.localeCompare(b.name);
+                            })
+                            .map((pdf) => (
                                 <div
-                                    className="aspect-[3/4] bg-gray-100 rounded-xl mb-4 overflow-hidden relative"
+                                    key={pdf.id}
+                                    className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-purple-200 transition-all group flex flex-col h-full"
                                 >
-                                    {pdf.image_path ? (
-                                        <img src={pdf.image_path} alt={pdf.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                            <FiExternalLink size={48} />
-                                        </div>
-                                    )}
-                                </div>
-
-                                <h4 className="font-bold text-gray-800 truncate mb-1" title={pdf.name}>{pdf.name}</h4>
-
-                                {pdf.description && (
-                                    <p className="text-xs text-gray-500 mb-2 line-clamp-2 flex-1">{pdf.description}</p>
-                                )}
-
-                                <div className="flex flex-wrap gap-1 mb-3">
-                                    {pdf.category && (
-                                        <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full font-medium">
-                                            {pdf.category}
-                                        </span>
-                                    )}
-                                    {pdf.tags?.slice(0, 2).map((tag, idx) => (
-                                        <span key={idx} className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
-                                            #{tag}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <div className="flex gap-2 mt-auto">
-                                    <button
-                                        onClick={() => handleImportToLibrary(pdf)}
-                                        disabled={isImporting}
-                                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                    <div
+                                        className="aspect-[3/4] bg-gray-100 rounded-xl mb-4 overflow-hidden relative"
                                     >
-                                        <FiBookOpen size={14} /> Agregar
-                                    </button>
-                                    <button
-                                        onClick={() => handleDownloadPDF(pdf)}
-                                        className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded-lg transition-colors"
-                                    >
-                                        <FiDownload size={14} />
-                                    </button>
+                                        {pdf.image_path ? (
+                                            <img src={pdf.image_path} alt={pdf.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                <FiExternalLink size={48} />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <h4 className="font-bold text-gray-800 truncate mb-1" title={pdf.name}>{pdf.name}</h4>
+
+                                    {pdf.description && (
+                                        <p className="text-xs text-gray-500 mb-2 line-clamp-2 flex-1">{pdf.description}</p>
+                                    )}
+
+                                    <div className="flex flex-wrap gap-1 mb-3">
+                                        {pdf.category && (
+                                            <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full font-medium">
+                                                {pdf.category}
+                                            </span>
+                                        )}
+                                        {pdf.tags?.slice(0, 2).map((tag, idx) => (
+                                            <span key={idx} className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex gap-2 mt-auto">
+                                        <button
+                                            onClick={() => handleImportToLibrary(pdf)}
+                                            disabled={isImporting}
+                                            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                        >
+                                            <FiBookOpen size={14} /> Agregar
+                                        </button>
+                                        <button
+                                            onClick={() => handleDownloadPDF(pdf)}
+                                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded-lg transition-colors"
+                                        >
+                                            <FiDownload size={14} />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                     </div>
                 </div>
             )}

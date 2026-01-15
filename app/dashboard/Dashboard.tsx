@@ -12,6 +12,7 @@ import ExploreView from './ExploreView';
 import MovePDFsModal from './MovePDFsModal';
 import CreateFolderModal from './CreateFolderModal';
 import RenameFolderModal from './RenameFolderModal';
+import PDFFilterNav from './PDFFilterNav';
 import { useToast } from '../providers/ToastProvider';
 
 // Importar PDFViewer solo en el cliente para evitar errores de SSR
@@ -58,6 +59,11 @@ export default function Dashboard({ userName }: DashboardProps) {
     const [editingFolder, setEditingFolder] = useState<string | null>(null);
     const [newFolderName, setNewFolderName] = useState('');
     const { showToast } = useToast();
+
+    // Filtering State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
+    const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
     const [detailPdf, setDeatilspdf] = useState<PDF | null>(null);
 
@@ -241,6 +247,65 @@ export default function Dashboard({ userName }: DashboardProps) {
         }
     };
 
+    // Filter Logic Helper
+    const getFilteredAndSortedPDFs = () => {
+        let filtered = pdfs.filter(pdf => {
+            // Tab filtering
+            if (activeTab === 'favorites' && !pdf.isFavorite) return false;
+            if (activeTab === 'folders') {
+                if (selectedCategory) {
+                    if (pdf.folderName !== selectedCategory) return false;
+                } else {
+                    return false; // Should be handled by folder view
+                }
+            }
+
+            // Search filtering
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                const matchesTitle = pdf.title.toLowerCase().includes(term);
+                const matchesCategory = pdf.category?.toLowerCase().includes(term);
+                if (!matchesTitle && !matchesCategory) return false;
+            }
+
+            // Category filtering
+            if (filterCategory && pdf.category !== filterCategory) return false;
+
+            return true;
+        });
+
+        // Sorting
+        return filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
+                case 'oldest':
+                    return new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime();
+                case 'name_asc':
+                    return a.title.localeCompare(b.title);
+                case 'name_desc':
+                    return b.title.localeCompare(a.title);
+                case 'size_desc':
+                    return b.size - a.size;
+                case 'size_asc':
+                    return a.size - b.size;
+                default:
+                    return 0;
+            }
+        });
+    };
+
+    // Extract unique categories for the current view (ignoring text search to keep options available)
+    const getAvailableCategories = () => {
+        const relevantPDFs = pdfs.filter(pdf => {
+            if (activeTab === 'favorites' && !pdf.isFavorite) return false;
+            if (activeTab === 'folders' && selectedCategory && pdf.folderName !== selectedCategory) return false;
+            return true;
+        });
+        const categories = new Set(relevantPDFs.map(p => p.category).filter(Boolean) as string[]);
+        return Array.from(categories);
+    };
+
     return (
         <div className="flex h-screen bg-gradient-to-br from-[#E8F0FF] via-[#B8D0FF] to-[#4F6FFF] overflow-hidden">
             <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -384,57 +449,56 @@ export default function Dashboard({ userName }: DashboardProps) {
                                         // VISTA DE LISTA DE PDFs
                                         <>
                                             {(() => {
-                                                // Lógica de filtrado
-                                                const filteredPDFs = pdfs.filter(pdf => {
-                                                    if (activeTab === 'favorites') return pdf.isFavorite;
-                                                    if (activeTab === 'folders') {
-                                                        if (selectedCategory) {
-                                                            return pdf.folderName === selectedCategory;
-                                                        }
-                                                        return false; // Should not reach here if not selectedCategory
-                                                    }
-                                                    return true; // 'pdfs' tab shows all
-                                                });
-
-                                                if (filteredPDFs.length === 0) {
-                                                    return (
-                                                        <div className="text-center py-20">
-                                                            <div className="text-6xl mb-4">📄</div>
-                                                            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                                                                No hay documentos aquí
-                                                            </h3>
-                                                            <p className="text-gray-500">
-                                                                {activeTab === 'folders'
-                                                                    ? 'Esta carpeta está vacía'
-                                                                    : 'Sube documentos para verlos aquí'}
-                                                            </p>
-                                                        </div>
-                                                    );
-                                                }
+                                                const filteredPDFs = getFilteredAndSortedPDFs();
+                                                const availableCategories = getAvailableCategories();
 
                                                 return (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                                        {filteredPDFs.map((pdf) => (
-                                                            <PDFCard
-                                                                key={pdf.id}
-                                                                id={pdf.id}
-                                                                title={pdf.title}
-                                                                size={formatFileSize(pdf.size)}
-                                                                date={formatDate(pdf.uploadDate)}
-                                                                uploadDate={pdf.uploadDate}
-                                                                filePath={pdf.filePath}
-                                                                isFavorite={pdf.isFavorite}
-                                                                category={pdf.category}
-                                                                totalPages={pdf.totalPages}
-                                                                readingProgress={pdf.readingProgress}
-                                                                coverImage={pdf.coverImage}
-                                                                onToggleFavorite={() => toggleFavorite(pdf.id)}
-                                                                onOpen={() => handleOpenPdf(pdf)}
-                                                                onUpdate={(updatedData) => handleUpdatePdf(pdf.id, updatedData)}
-                                                                onDelete={() => handleDeletePdf(pdf.id)}
-                                                                onViewDetails={() => setDeatilspdf(pdf)}
-                                                            />
-                                                        ))}
+                                                    <div>
+                                                        <PDFFilterNav
+                                                            categories={availableCategories}
+                                                            selectedCategory={filterCategory}
+                                                            onSelectCategory={setFilterCategory}
+                                                            searchTerm={searchTerm}
+                                                            onSearchChange={setSearchTerm}
+                                                            sortBy={sortBy}
+                                                            onSortChange={setSortBy}
+                                                        />
+
+                                                        {filteredPDFs.length === 0 ? (
+                                                            <div className="text-center py-20">
+                                                                <div className="text-6xl mb-4">📄</div>
+                                                                <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                                                                    No se encontraron documentos
+                                                                </h3>
+                                                                <p className="text-gray-500">
+                                                                    Intenta ajustar los filtros o tu búsqueda
+                                                                </p>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                                                {filteredPDFs.map((pdf) => (
+                                                                    <PDFCard
+                                                                        key={pdf.id}
+                                                                        id={pdf.id}
+                                                                        title={pdf.title}
+                                                                        size={formatFileSize(pdf.size)}
+                                                                        date={formatDate(pdf.uploadDate)}
+                                                                        uploadDate={pdf.uploadDate}
+                                                                        filePath={pdf.filePath}
+                                                                        isFavorite={pdf.isFavorite}
+                                                                        category={pdf.category}
+                                                                        totalPages={pdf.totalPages}
+                                                                        readingProgress={pdf.readingProgress}
+                                                                        coverImage={pdf.coverImage}
+                                                                        onToggleFavorite={() => toggleFavorite(pdf.id)}
+                                                                        onOpen={() => handleOpenPdf(pdf)}
+                                                                        onUpdate={(updatedData) => handleUpdatePdf(pdf.id, updatedData)}
+                                                                        onDelete={() => handleDeletePdf(pdf.id)}
+                                                                        onViewDetails={() => setDeatilspdf(pdf)}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 );
                                             })()}
