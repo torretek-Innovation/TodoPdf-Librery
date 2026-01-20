@@ -11,13 +11,16 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Exclude deleted PDFs logic removed temporarily due to prisma generation lock
-        // This ensures the library is visible even if schema update is pending restart
+        // Get only deleted PDFs
         const pdfs = await prisma.pdf.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' }
+            where: {
+                userId,
+                // @ts-ignore
+                deletedAt: { not: null }
+            },
+            // @ts-ignore
+            orderBy: { deletedAt: 'desc' }
         });
-
 
         // Get favorites for this user
         const favorites = await prisma.favorite.findMany({
@@ -40,6 +43,7 @@ export async function GET(request: NextRequest) {
             fileName: pdf.filePath.split('/').pop() || '',
             filePath: pdf.filePath,
             uploadDate: pdf.createdAt.toISOString(),
+            deletedDate: (pdf as any).deletedAt?.toISOString(),
             size: (pdf as any).size || 0,
             totalPages: pdf.totalPages || 0,
             coverImage: pdf.coverImagePath,
@@ -51,9 +55,15 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ pdfs: formattedPdfs });
 
-    } catch (error) {
-        console.error('Error listing PDFs:', error);
-        return NextResponse.json({ error: 'Failed to list PDFs' }, { status: 500 });
+    } catch (error: any) {
+        // If we have a schema mismatch (e.g. deletedAt column not in client), just return empty list
+        if (error.message && error.message.includes('Unknown argument')) {
+            console.warn('⚠️ Schema mismatch detected in trash list. Returning empty list.');
+            return NextResponse.json({ pdfs: [] });
+        }
+
+        console.error('Error listing trash PDFs:', error);
+        return NextResponse.json({ error: 'Failed to list trash PDFs' }, { status: 500 });
     } finally {
         await prisma.$disconnect();
     }

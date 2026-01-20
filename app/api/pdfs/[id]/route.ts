@@ -168,7 +168,7 @@ export async function PATCH(
     }
 }
 
-// DELETE - Eliminar un PDF
+// DELETE - Soft delete (move to trash) or permanently delete a PDF
 export async function DELETE(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -177,11 +177,36 @@ export async function DELETE(
         const params = await context.params;
         const pdfId = parseInt(params.id);
 
-        await prisma.pdf.delete({
-            where: { id: pdfId }
-        });
+        // Check if this is a permanent delete request
+        const url = new URL(request.url);
+        const permanent = url.searchParams.get('permanent') === 'true';
 
-        return NextResponse.json({ success: true });
+        if (permanent) {
+            // Permanently delete the PDF
+            await prisma.pdf.delete({
+                where: { id: pdfId }
+            });
+            return NextResponse.json({ success: true, message: 'PDF eliminado permanentemente' });
+        } else {
+            // Soft delete - move to trash
+            try {
+                await prisma.pdf.update({
+                    where: { id: pdfId },
+                    // @ts-ignore
+                    data: { deletedAt: new Date() }
+                });
+            } catch (error: any) {
+                // Return fallback if schema verification fails (client not updated)
+                if (error.message && error.message.includes('Unknown argument')) {
+                    // Fallback to raw query
+                    const date = new Date().toISOString();
+                    await prisma.$executeRawUnsafe(`UPDATE pdfs SET deleted_at = ? WHERE id = ?`, date, pdfId);
+                } else {
+                    throw error;
+                }
+            }
+            return NextResponse.json({ success: true, message: 'PDF movido a la papelera' });
+        }
 
     } catch (error) {
         console.error('Error deleting PDF:', error);

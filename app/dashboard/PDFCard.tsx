@@ -28,6 +28,7 @@ interface PDFCardProps {
     }) => Promise<boolean>;
     onDelete?: () => void;
     onToggleFavorite?: () => void;
+    isInTrash?: boolean;
 }
 
 export default function PDFCard({
@@ -47,7 +48,8 @@ export default function PDFCard({
     onDelete,
     onViewDetails,
     onToggleFavorite,
-    folderName
+    folderName,
+    isInTrash = false
 }: PDFCardProps) {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);

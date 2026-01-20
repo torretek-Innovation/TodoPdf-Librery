@@ -9,6 +9,7 @@ import PDFCard from './PDFCard';
 import PDFDetailsModal from './PDFDetailsModal';
 import StatsView from './StatsView';
 import ExploreView from './ExploreView';
+import TrashView from './TrashView';
 import MovePDFsModal from './MovePDFsModal';
 import CreateFolderModal from './CreateFolderModal';
 import RenameFolderModal from './RenameFolderModal';
@@ -143,6 +144,9 @@ export default function Dashboard({ userName }: DashboardProps) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         }).catch(err => console.log('Sync skipped or failed:', err));
+
+        // Trigger trash cleanup silently
+        fetch('/api/cron/cleanup-trash').catch(err => console.log('Cleanup check skipped:', err));
 
     }, []);
 
@@ -344,6 +348,8 @@ export default function Dashboard({ userName }: DashboardProps) {
                         <ExploreView onPdfAdded={loadPDFs} />
                     ) : activeTab === 'home' ? (
                         <StatsView pdfs={pdfs} userName={userName} />
+                    ) : activeTab === 'trash' ? (
+                        <TrashView onRestore={loadPDFs} />
                     ) : (
                         <div className="max-w-7xl mx-auto">
                             <div className="mb-6 flex items-center gap-4">
