@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { FiSearch, FiExternalLink, FiDownload, FiAlertCircle, FiLoader, FiTrash2, FiUpload, FiPlus, FiBookOpen, FiX, FiArrowLeft } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
 import { useToast } from '../providers/ToastProvider';
@@ -39,7 +39,7 @@ interface SavedLibrary {
     createdAt: string;
 }
 
-export default function ExploreView() {
+export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void }) {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [url, setUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,7 @@ export default function ExploreView() {
     const [data, setData] = useState<IndexFile | null>(null);
     const [selectedPdf, setSelectedPdf] = useState<ExplorePDF | null>(null);
     const [savedLibraries, setSavedLibraries] = useState<SavedLibrary[]>([]);
-    const [isImporting, setIsImporting] = useState(false);
+    const [importingIds, setImportingIds] = useState<Set<string>>(new Set());
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { showToast } = useToast();
 
@@ -55,6 +55,45 @@ export default function ExploreView() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('name_asc');
     const [filterCategory, setFilterCategory] = useState<string | null>(null);
+    const [filterTag, setFilterTag] = useState<string | null>(null);
+
+    // Derived State for Filters
+    const availableCategories = useMemo(() => {
+        if (!data?.pdfs) return [];
+        return Array.from(new Set(data.pdfs.map(p => p.category).filter(Boolean) as string[])).sort();
+    }, [data]);
+
+    const availableTags = useMemo(() => {
+        if (!data?.pdfs) return [];
+
+        // Use a map to store the 'display' version of a tag, keyed by lowercase version
+        // This ensures case-insensitive deduplication but nice display
+        const tagMap = new Map<string, string>();
+
+        data.pdfs.forEach(pdf => {
+            // If a category is selected, only show tags from that category
+            if (filterCategory && pdf.category !== filterCategory) return;
+
+            const processTag = (t: string) => {
+                if (!t || typeof t !== 'string') return;
+                const cleanTag = t.trim();
+                if (!cleanTag) return;
+
+                const lower = cleanTag.toLowerCase();
+                if (!tagMap.has(lower)) {
+                    tagMap.set(lower, cleanTag); // First one wins for display casing
+                }
+            };
+
+            if (Array.isArray(pdf.tags)) {
+                pdf.tags.forEach(processTag);
+            } else if (typeof pdf.tags === 'string') {
+                (pdf.tags as string).split(',').forEach(processTag);
+            }
+        });
+
+        return Array.from(tagMap.values()).sort((a, b) => a.localeCompare(b));
+    }, [data, filterCategory]);
 
     // Load saved libraries from database
     useEffect(() => {
@@ -236,7 +275,7 @@ export default function ExploreView() {
     };
 
     const handleImportToLibrary = async (pdf: ExplorePDF) => {
-        setIsImporting(true);
+        setImportingIds(prev => new Set(Array.from(prev).concat(pdf.id)));
         try {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/external-libraries/import-pdf', {
@@ -256,10 +295,15 @@ export default function ExploreView() {
             if (!res.ok) throw new Error('Error al importar');
 
             showToast(`✅ "${pdf.name}" se agregó a tu biblioteca`, 'success');
+            if (onPdfAdded) onPdfAdded();
         } catch (err: any) {
             showToast(err.message || 'Error al importar', 'error');
         } finally {
-            setIsImporting(false);
+            setImportingIds(prev => {
+                const newSet = new Set(Array.from(prev));
+                newSet.delete(pdf.id);
+                return newSet;
+            });
         }
     };
 
@@ -418,9 +462,15 @@ export default function ExploreView() {
 
                     {/* Filter Nav */}
                     <PDFFilterNav
-                        categories={Array.from(new Set(data.pdfs.map(p => p.category).filter(Boolean) as string[]))}
+                        categories={availableCategories}
                         selectedCategory={filterCategory}
-                        onSelectCategory={setFilterCategory}
+                        onSelectCategory={(cat) => {
+                            setFilterCategory(cat);
+                            setFilterTag(null);
+                        }}
+                        tags={availableTags}
+                        selectedTag={filterTag}
+                        onSelectTag={setFilterTag}
                         searchTerm={searchTerm}
                         onSearchChange={setSearchTerm}
                         sortBy={sortBy}
@@ -434,7 +484,7 @@ export default function ExploreView() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {data.pdfs
                             .filter(pdf => {
-                                // Search
+                                // Search (basic text search)
                                 if (searchTerm) {
                                     const term = searchTerm.toLowerCase();
                                     const matchesName = pdf.name.toLowerCase().includes(term);
@@ -442,8 +492,20 @@ export default function ExploreView() {
                                     const matchesTags = pdf.tags?.some(tag => tag.toLowerCase().includes(term));
                                     if (!matchesName && !matchesCat && !matchesTags) return false;
                                 }
-                                // Category
+
+                                // Category Filter
                                 if (filterCategory && pdf.category !== filterCategory) return false;
+
+                                // Tag Filter
+                                if (filterTag) {
+                                    const lowerFilter = filterTag.toLowerCase();
+                                    const hasTag = Array.isArray(pdf.tags)
+                                        ? pdf.tags.some(t => t?.toLowerCase().trim() === lowerFilter)
+                                        : (typeof pdf.tags === 'string' && (pdf.tags as string).toLowerCase().split(',').map(t => t.trim()).includes(lowerFilter));
+
+                                    if (!hasTag) return false;
+                                }
+
                                 return true;
                             })
                             .sort((a, b) => {
@@ -489,10 +551,19 @@ export default function ExploreView() {
                                     <div className="flex gap-2 mt-auto">
                                         <button
                                             onClick={() => handleImportToLibrary(pdf)}
-                                            disabled={isImporting}
-                                            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                            disabled={importingIds.has(pdf.id)}
+                                            className={`flex-1 px-3 py-2 text-white text-xs rounded-lg transition-colors flex items-center justify-center gap-1 ${importingIds.has(pdf.id) ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+                                                }`}
                                         >
-                                            <FiBookOpen size={14} /> Agregar
+                                            {importingIds.has(pdf.id) ? (
+                                                <>
+                                                    <FiLoader className="animate-spin" size={14} /> Agregando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FiBookOpen size={14} /> Agregar
+                                                </>
+                                            )}
                                         </button>
                                         <button
                                             onClick={() => handleDownloadPDF(pdf)}
@@ -519,249 +590,6 @@ export default function ExploreView() {
             {showCreateModal && (
                 <CreateJSONModal onClose={() => setShowCreateModal(false)} />
             )}
-        </div>
-    );
-}
-
-// Create JSON View Component
-function CreateJSONView({ onBack }: { onBack: () => void }) {
-    const { showToast } = useToast();
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        owner: '',
-        source: 'google-drive',
-        visibility: 'public',
-        version: '1.0.0'
-    });
-    const [pdfs, setPdfs] = useState<Partial<ExplorePDF>[]>([]);
-
-    const addPDF = () => {
-        setPdfs([...pdfs, {
-            id: `pdf-${Date.now()}`,
-            name: '',
-            description: '',
-            url: '',
-            image_path: '',
-            category: '',
-            tags: []
-        }]);
-    };
-
-    const updatePDF = (index: number, field: string, value: any) => {
-        const updated = [...pdfs];
-        updated[index] = { ...updated[index], [field]: value };
-        setPdfs(updated);
-    };
-
-    const removePDF = (index: number) => {
-        setPdfs(pdfs.filter((_, i) => i !== index));
-    };
-
-    const handleDownload = () => {
-        const jsonData = {
-            ...formData,
-            updatedAt: new Date().toISOString(),
-            pdfs: pdfs.filter(pdf => pdf.name && pdf.url)
-        };
-
-        const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${formData.title.replace(/[^a-z0-9]/gi, '_') || 'biblioteca'}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        showToast('Archivo JSON descargado exitosamente', 'success');
-    };
-
-    return (
-        <div className="max-w-4xl mx-auto">
-            <div className="mb-6 flex items-center gap-4">
-                <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <FiX size={24} />
-                </button>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Crear Diccionario de PDFs</h2>
-                    <p className="text-gray-600 text-sm">Crea tu propio índice JSON para compartir</p>
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 mb-6">
-                <h3 className="font-bold text-gray-800 mb-4">Información General</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Título de la Biblioteca *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                            placeholder="Mi Biblioteca de PDFs"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Propietario
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.owner}
-                            onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                            placeholder="Tu nombre"
-                        />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Descripción
-                        </label>
-                        <textarea
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                            rows={3}
-                            placeholder="Describe tu colección de documentos..."
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Versión
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.version}
-                            onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 mb-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-gray-800">PDFs ({pdfs.length})</h3>
-                    <button
-                        onClick={addPDF}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm flex items-center gap-2 transition-colors"
-                    >
-                        <FiPlus /> Agregar PDF
-                    </button>
-                </div>
-
-                {pdfs.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400">
-                        <p>No hay PDFs agregados. Haz clic en "Agregar PDF" para comenzar.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {pdfs.map((pdf, index) => (
-                            <div key={index} className="border border-gray-200 rounded-lg p-4">
-                                <div className="flex justify-between items-start mb-3">
-                                    <span className="text-sm font-medium text-gray-700">PDF #{index + 1}</span>
-                                    <button
-                                        onClick={() => removePDF(index)}
-                                        className="text-red-500 hover:text-red-700"
-                                    >
-                                        <FiTrash2 size={16} />
-                                    </button>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs text-gray-600 mb-1">Nombre del PDF *</label>
-                                        <input
-                                            type="text"
-                                            value={pdf.name || ''}
-                                            onChange={(e) => updatePDF(index, 'name', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            placeholder="JavaScript Básico"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-600 mb-1">ID único</label>
-                                        <input
-                                            type="text"
-                                            value={pdf.id || ''}
-                                            onChange={(e) => updatePDF(index, 'id', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            placeholder="js-basico"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs text-gray-600 mb-1">URL de Google Drive *</label>
-                                        <input
-                                            type="text"
-                                            value={pdf.url || ''}
-                                            onChange={(e) => updatePDF(index, 'url', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            placeholder="https://drive.google.com/file/d/FILE_ID/view"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs text-gray-600 mb-1">URL de Imagen (Portada)</label>
-                                        <input
-                                            type="text"
-                                            value={pdf.image_path || ''}
-                                            onChange={(e) => updatePDF(index, 'image_path', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            placeholder="https://drive.google.com/uc?export=view&id=IMAGE_ID"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-600 mb-1">Categoría</label>
-                                        <input
-                                            type="text"
-                                            value={pdf.category || ''}
-                                            onChange={(e) => updatePDF(index, 'category', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            placeholder="Programación"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs text-gray-600 mb-1">Tags (separados por coma)</label>
-                                        <input
-                                            type="text"
-                                            value={pdf.tags?.join(', ') || ''}
-                                            onChange={(e) => updatePDF(index, 'tags', e.target.value.split(',').map(t => t.trim()))}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            placeholder="javascript, frontend, basico"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs text-gray-600 mb-1">Descripción</label>
-                                        <textarea
-                                            value={pdf.description || ''}
-                                            onChange={(e) => updatePDF(index, 'description', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-                                            rows={2}
-                                            placeholder="Breve descripción del contenido..."
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            <div className="flex justify-end gap-3">
-                <button
-                    onClick={onBack}
-                    className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
-                >
-                    Cancelar
-                </button>
-                <button
-                    onClick={handleDownload}
-                    disabled={!formData.title || pdfs.filter(p => p.name && p.url).length === 0}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all flex items-center gap-2"
-                >
-                    <FiDownload /> Descargar JSON
-                </button>
-            </div>
         </div>
     );
 }
