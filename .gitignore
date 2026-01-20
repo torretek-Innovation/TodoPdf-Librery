@@ -37,7 +37,8 @@ yarn-error.log*
 .vercel
 
 #database
-/prisma
+/prisma/*
+/prisma/
 
 # typescript
 *.tsbuildinfo
