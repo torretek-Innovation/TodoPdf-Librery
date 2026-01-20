@@ -8,11 +8,12 @@ interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     userName: string;
+    onUpdateUser: (name: string) => void;
 }
 
 type Tab = 'account' | 'appearance' | 'notifications' | 'security';
 
-export default function SettingsModal({ isOpen, onClose, userName }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser }: SettingsModalProps) {
     const [activeTab, setActiveTab] = useState<Tab>('account');
     const [isLoading, setIsLoading] = useState(false);
     const { showToast } = useToast();
@@ -53,9 +54,19 @@ export default function SettingsModal({ isOpen, onClose, userName }: SettingsMod
 
             if (res.ok) {
                 const data = await res.json();
+
+                // Auto-fix for legacy users where username is an email and email is empty
+                let displayUsername = data.username || userName;
+                let displayEmail = data.email || '';
+
+                if (!displayEmail && displayUsername && displayUsername.includes('@')) {
+                    displayEmail = displayUsername;
+                    displayUsername = displayUsername.split('@')[0];
+                }
+
                 setFormData({
-                    displayName: data.username || userName,
-                    email: data.email || '',
+                    displayName: displayUsername,
+                    email: displayEmail,
                     theme: data.theme || 'light',
                     notifications: data.notifications ?? true,
                     language: data.language || 'es',
@@ -136,16 +147,36 @@ export default function SettingsModal({ isOpen, onClose, userName }: SettingsMod
                     },
                     body: JSON.stringify({
                         username: formData.displayName,
+                        email: formData.email,
                         theme: formData.theme,
                         language: formData.language,
                         notifications: formData.notifications
                     })
                 });
 
-                if (!resProfile.ok) throw new Error('Error al guardar perfil');
+                if (!resProfile.ok) {
+                    const error = await resProfile.json();
+                    throw new Error(error.error || 'Error al guardar perfil');
+                }
+
+                const updatedUser = await resProfile.json();
+
+                // Update local storage to reflect changes immediately
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser);
+                    localStorage.setItem('user', JSON.stringify({
+                        ...parsedUser,
+                        username: formData.displayName,
+                        email: formData.email
+                    }));
+                }
 
                 // Apply theme immediately
                 applyTheme(formData.theme);
+
+                // Update parent state
+                onUpdateUser(formData.displayName);
 
                 showToast('Perfil actualizado correctamente', 'success');
             }
@@ -290,11 +321,12 @@ export default function SettingsModal({ isOpen, onClose, userName }: SettingsMod
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                                         <input
                                             type="email"
-                                            value={formData.email || 'No configurado'}
-                                            disabled
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            placeholder="correo@ejemplo.com"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">El email se genera automáticamente o contacta soporte.</p>
+                                        <p className="text-xs text-gray-500 mt-1">El email se usa para notificaciones y recuperación.</p>
                                     </div>
                                 </div>
                             </div>

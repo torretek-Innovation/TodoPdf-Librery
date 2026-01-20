@@ -15,12 +15,19 @@ export default function Home() {
   useEffect(() => {
     // Verificar si existe un token
     const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
 
     if (token) {
-      // Opcional: Verificar si el token es válido con tu backend
-      // fetch('/api/verify-token', { headers: { Authorization: `Bearer ${token}` }})
-      //     .then(res => res.ok ? setIsAuthenticated(true) : handleInvalidToken())
-
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          // Prioritize username, then try to fallback to name or email
+          const displayName = user.username || user.name || user.email?.split('@')[0] || 'Usuario';
+          setUserName(displayName);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      }
       setIsAuthenticated(true);
     } else {
       setIsAuthenticated(false);
@@ -28,9 +35,12 @@ export default function Home() {
 
     setIsLoading(false);
   }, []);
+
   // Mostrar un loading mientras se verifica
   if (isLoading) {
-    return <div>Cargando...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+    </div>;
   }
 
 
@@ -53,5 +63,5 @@ export default function Home() {
     );
   }
 
-  return <Dashboard userName={userName} />;
+  return <Dashboard userName={userName} onUpdateUser={setUserName} />;
 }

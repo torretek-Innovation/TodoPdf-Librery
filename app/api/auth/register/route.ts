@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword } from '@/lib/auth';
-import { signToken } from '@/lib/jwt';
+import { hashPassword, generateToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { username, password } = body;
+        const { username, email, password } = body;
 
         // Validaciones
-        if (!username || !password) {
+        if (!username || !password || !email) {
             return NextResponse.json(
-                { error: 'Username y password son requeridos' },
+                { error: 'Todos los campos son requeridos' },
                 { status: 400 }
             );
         }
@@ -23,14 +22,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verificar si el usuario ya existe
-        const existingUser = await prisma.user.findUnique({
-            where: { username },
+        // Verificar si el usuario o email ya existe
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { username: username },
+                    { email: email }
+                ]
+            },
         });
 
         if (existingUser) {
             return NextResponse.json(
-                { error: 'El usuario ya existe' },
+                { error: 'El nombre de usuario o correo ya está registrado' },
                 { status: 409 }
             );
         }
@@ -42,14 +46,15 @@ export async function POST(request: NextRequest) {
         const user = await prisma.user.create({
             data: {
                 username,
+                email,
                 passwordHash,
             },
         });
 
         // Generar token JWT
-        const token = signToken({
+        const token = generateToken({
             userId: user.id,
-            username: user.username,
+            email: user.email || user.username,
         });
 
         // Retornar usuario y token
@@ -59,6 +64,7 @@ export async function POST(request: NextRequest) {
                 user: {
                     id: user.id,
                     username: user.username,
+                    email: user.email,
                     createdAt: user.createdAt,
                 },
                 token,

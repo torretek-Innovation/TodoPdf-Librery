@@ -32,6 +32,7 @@ const PDFViewer = dynamic(() => import('./PDFViewer'), {
 
 interface DashboardProps {
     userName: string;
+    onUpdateUser: (name: string) => void;
 }
 
 interface PDF {
@@ -49,7 +50,7 @@ interface PDF {
     readingProgress?: number;
 }
 
-export default function Dashboard({ userName }: DashboardProps) {
+export default function Dashboard({ userName, onUpdateUser }: DashboardProps) {
     const [activeTab, setActiveTab] = useState('home');
     const [pdfs, setPdfs] = useState<PDF[]>([]);
     const [allPdfs, setAllPdfs] = useState<PDF[]>([]); // Include placeholders for folder counting
@@ -611,6 +612,7 @@ export default function Dashboard({ userName }: DashboardProps) {
                 isOpen={showSettingsModal}
                 onClose={() => setShowSettingsModal(false)}
                 userName={userName}
+                onUpdateUser={onUpdateUser}
             />
         </div >
     );

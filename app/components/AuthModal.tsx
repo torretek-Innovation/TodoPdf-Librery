@@ -28,10 +28,18 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    username: email,  // O 'email' si tu backend espera 'email'
-                    password: password,
-                }),
+                body: JSON.stringify(
+                    isLogin
+                        ? {
+                            username: email,
+                            password: password,
+                        }
+                        : {
+                            username: name,
+                            email: email,
+                            password: password,
+                        }
+                ),
             });
 
             const data = await response.json();

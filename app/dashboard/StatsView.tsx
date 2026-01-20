@@ -88,7 +88,7 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
             {/* Bienvenida */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">
-                    Hola, <span className="text-[#4F6FFF]">{userName}</span> 👋
+                    Hola, <span className="text-[#4F6FFF]">{userName.includes('@') ? userName.split('@')[0] : userName}</span> 👋
                 </h1>
                 <p className="text-gray-500 mt-2">Aquí tienes un resumen de tu actividad de lectura.</p>
             </div>
