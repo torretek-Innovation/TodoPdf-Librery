@@ -341,7 +341,7 @@ export default function Dashboard({ userName }: DashboardProps) {
 
                 <main className="flex-1 overflow-y-auto p-6">
                     {activeTab === 'explore' ? (
-                        <ExploreView />
+                        <ExploreView onPdfAdded={loadPDFs} />
                     ) : activeTab === 'home' ? (
                         <StatsView pdfs={pdfs} userName={userName} />
                     ) : (

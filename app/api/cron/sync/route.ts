@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!user || !user.driveWatchUrl) {
-            return NextResponse.json({ error: 'No watch URL configured' }, { status: 400 });
+            return NextResponse.json({ skipped: true, message: 'No watch URL configured' });
         }
 
         // Check if 24 hours passed, unless force=true is passed
