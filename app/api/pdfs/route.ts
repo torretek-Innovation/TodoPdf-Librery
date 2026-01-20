@@ -11,12 +11,42 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Exclude deleted PDFs logic removed temporarily due to prisma generation lock
-        // This ensures the library is visible even if schema update is pending restart
-        const pdfs = await prisma.pdf.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' }
-        });
+        // Try to fetch with Prisma Client filtering
+        let pdfs;
+        try {
+            pdfs = await prisma.pdf.findMany({
+                where: {
+                    userId,
+                    deletedAt: null
+                },
+                orderBy: { createdAt: 'desc' }
+            });
+        } catch (error: any) {
+            // Fallback: If Prisma Client is out of sync (missing deletedAt), use raw query
+            if (error.message && error.message.includes('Unknown argument')) {
+                console.warn('⚠️ Schema mismatch (active). Using raw query fallback.');
+                const rawPdfs: any[] = await prisma.$queryRaw`
+                    SELECT 
+                        id, user_id as userId, title, file_path as filePath, 
+                        cover_image_path as coverImagePath, total_pages as totalPages, 
+                        size, folder_name as folderName, deleted_at as deletedAt, 
+                        created_at as createdAt 
+                    FROM pdfs 
+                    WHERE user_id = ${userId} AND deleted_at IS NULL 
+                    ORDER BY created_at DESC
+                `;
+
+                // Parse dates from raw query
+                pdfs = rawPdfs.map(p => ({
+                    ...p,
+                    createdAt: new Date(p.createdAt),
+                    deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
+                    // Ensure numeric fields are numbers (SQLite might return strings for bigints sometimes, but usually fine)
+                }));
+            } else {
+                throw error;
+            }
+        }
 
 
         // Get favorites for this user

@@ -12,15 +12,42 @@ export async function GET(request: NextRequest) {
         }
 
         // Get only deleted PDFs
-        const pdfs = await prisma.pdf.findMany({
-            where: {
-                userId,
+        let pdfs;
+        try {
+            pdfs = await prisma.pdf.findMany({
+                where: {
+                    userId,
+                    // @ts-ignore
+                    deletedAt: { not: null }
+                },
                 // @ts-ignore
-                deletedAt: { not: null }
-            },
-            // @ts-ignore
-            orderBy: { deletedAt: 'desc' }
-        });
+                orderBy: { deletedAt: 'desc' }
+            });
+        } catch (error: any) {
+            // Fallback: If Prisma Client is out of sync (missing deletedAt), use raw query
+            if (error.message && error.message.includes('Unknown argument')) {
+                console.warn('⚠️ Schema mismatch (trash). Using raw query fallback.');
+                const rawPdfs: any[] = await prisma.$queryRaw`
+                    SELECT 
+                        id, user_id as userId, title, file_path as filePath, 
+                        cover_image_path as coverImagePath, total_pages as totalPages, 
+                        size, folder_name as folderName, deleted_at as deletedAt, 
+                        created_at as createdAt 
+                    FROM pdfs 
+                    WHERE user_id = ${userId} AND deleted_at IS NOT NULL 
+                    ORDER BY deleted_at DESC
+                `;
+
+                // Parse dates from raw query
+                pdfs = rawPdfs.map(p => ({
+                    ...p,
+                    createdAt: new Date(p.createdAt),
+                    deletedAt: p.deletedAt ? new Date(p.deletedAt) : null
+                }));
+            } else {
+                throw error;
+            }
+        }
 
         // Get favorites for this user
         const favorites = await prisma.favorite.findMany({
@@ -56,11 +83,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ pdfs: formattedPdfs });
 
     } catch (error: any) {
-        // If we have a schema mismatch (e.g. deletedAt column not in client), just return empty list
-        if (error.message && error.message.includes('Unknown argument')) {
-            console.warn('⚠️ Schema mismatch detected in trash list. Returning empty list.');
-            return NextResponse.json({ pdfs: [] });
-        }
+
 
         console.error('Error listing trash PDFs:', error);
         return NextResponse.json({ error: 'Failed to list trash PDFs' }, { status: 500 });
