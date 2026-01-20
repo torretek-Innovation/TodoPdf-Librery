@@ -5,7 +5,7 @@ import { getUserFromRequest } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Get all folders for user
+// Get all folders for user (Optional, used if you have a separate folder view)
 export async function GET(req: NextRequest) {
     try {
         const userId = getUserFromRequest(req);
@@ -32,7 +32,10 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ folders });
     } catch (error) {
+        console.error('Fetch folders error:', error);
         return NextResponse.json({ error: 'Failed to fetch folders' }, { status: 500 });
+    } finally {
+        await prisma.$disconnect();
     }
 }
 
@@ -44,38 +47,43 @@ export async function POST(req: NextRequest) {
 
         const { folderName } = await req.json();
 
-        if (!folderName) {
-            return NextResponse.json({ error: 'Folder name required' }, { status: 400 });
+        if (!folderName || !folderName.trim()) {
+            return NextResponse.json({ error: 'Folder name is required' }, { status: 400 });
         }
+
+        const cleanName = folderName.trim();
 
         // Check if folder already exists
         const existing = await prisma.pdf.findFirst({
             where: {
                 userId,
-                folderName: folderName
+                folderName: cleanName
             } as any
         });
 
         if (existing) {
-            return NextResponse.json({ error: 'Folder already exists' }, { status: 400 });
+            return NextResponse.json({ error: 'Folder already exists' }, { status: 409 });
         }
 
         // Create a placeholder PDF entry to represent the empty folder
-        // This will be removed when the first real PDF is added to the folder
+        // The dashboard looks for specific title '.folder_placeholder' to identify empty folders
         await prisma.pdf.create({
             data: {
                 userId,
                 title: '.folder_placeholder',
-                filePath: '/placeholder',
+                filePath: '/placeholder', // Dummy path required by schema
                 size: 0,
                 totalPages: 0,
-                folderName: folderName
+                folderName: cleanName
             } as any
         });
 
-        return NextResponse.json({ success: true, folderName });
+        return NextResponse.json({ success: true, folderName: cleanName });
+
     } catch (error) {
         console.error('Create folder error:', error);
         return NextResponse.json({ error: 'Failed to create folder' }, { status: 500 });
+    } finally {
+        await prisma.$disconnect();
     }
 }

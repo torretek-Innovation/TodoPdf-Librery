@@ -41,7 +41,10 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
         try {
             const res = await fetch('/api/folders/move-pdfs', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({
                     pdfIds: selectedPdfs,
                     folderName: targetFolder
@@ -86,8 +89,8 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
                                     key={pdf.id}
                                     onClick={() => togglePdf(pdf.id)}
                                     className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPdfs.includes(pdf.id)
-                                            ? 'border-purple-500 bg-purple-50'
-                                            : 'border-gray-200 hover:border-purple-300'
+                                        ? 'border-purple-500 bg-purple-50'
+                                        : 'border-gray-200 hover:border-purple-300'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between">

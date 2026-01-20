@@ -11,12 +11,10 @@ interface HeaderProps {
     userName: string;
     onPdfUploaded?: (pdf: any) => void;
     onNavigate: (tab: string) => void;
+    onOpenSettings: () => void;
 }
 
-
-
-
-export default function Header({ userName, onPdfUploaded, onNavigate }: HeaderProps) {
+export default function Header({ userName, onPdfUploaded, onNavigate, onOpenSettings }: HeaderProps) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const { showToast, notifications, markAsRead, clearNotifications, unreadCount } = useToast();
@@ -424,7 +422,10 @@ export default function Header({ userName, onPdfUploaded, onNavigate }: HeaderPr
                         {showUserMenu && (
                             <div className="absolute right-0 mt-2 w-48 bg-[#1A1D2E] border border-[#2A2D3E] rounded-lg shadow-xl z-50">
                                 <button
-                                    onClick={handleLogout}
+                                    onClick={() => {
+                                        setShowUserMenu(false);
+                                        onOpenSettings();
+                                    }}
                                     className="w-full px-4 py-3 text-left text-white hover:bg-[#2A2D3E] transition-colors flex items-center gap-2 rounded-lg"
                                 >
                                     <CiSettings size={18} />

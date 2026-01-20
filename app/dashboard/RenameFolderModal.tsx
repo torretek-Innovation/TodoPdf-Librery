@@ -39,7 +39,10 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
         try {
             const res = await fetch(`/api/folders/${encodeURIComponent(currentName)}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({ newName: newName.trim() })
             });
 

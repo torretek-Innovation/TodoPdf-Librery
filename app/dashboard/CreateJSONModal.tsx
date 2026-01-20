@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { FiX, FiPlus, FiTrash2, FiDownload, FiInfo, FiUpload } from 'react-icons/fi';
+import { FiX, FiPlus, FiTrash2, FiDownload, FiInfo, FiUpload, FiRefreshCw, FiLink } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
 
 interface ExplorePDF {
@@ -26,7 +26,52 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
     });
 
     const [pdfs, setPdfs] = useState<Partial<ExplorePDF>[]>([]);
+    const [driveUrl, setDriveUrl] = useState('');
+    const [isScanning, setIsScanning] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleScanDrive = async () => {
+        if (!driveUrl) return;
+        setIsScanning(true);
+
+        try {
+            const response = await fetch('/api/automation/scan-drive', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folderUrl: driveUrl })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error al escanear carpeta');
+            }
+
+            if (data.pdfs && Array.isArray(data.pdfs)) {
+                // Merge new PDFs with existing ones (or replace if existing list is empty/user prefers)
+                // Here we append new ones
+                setPdfs(prev => [...prev, ...data.pdfs]);
+
+                // Update metadata if empty
+                setFormData(prev => ({
+                    ...prev,
+                    title: prev.title || data.title || '',
+                    description: prev.description || data.description || '',
+                    owner: prev.owner || data.owner || ''
+                }));
+
+                showToast(`¡Escaneo completado! Se encontraron ${data.pdfs.length} libros.`, 'success');
+            } else {
+                showToast('No se encontraron PDFs en la respuesta', 'warning');
+            }
+
+        } catch (error: any) {
+            console.error('Scan error:', error);
+            showToast(error.message, 'error');
+        } finally {
+            setIsScanning(false);
+        }
+    };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -190,6 +235,52 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    {/* Automation Section */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <FiRefreshCw className="text-white" size={18} />
+                            </div>
+                            <h3 className="font-bold text-gray-800">Automatización</h3>
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                            <div className="flex-1 w-full">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    URL de Carpeta de Google Drive (Pública)
+                                </label>
+                                <div className="relative">
+                                    <FiLink className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={driveUrl}
+                                        onChange={(e) => setDriveUrl(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                        placeholder="https://drive.google.com/drive/folders/..."
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleScanDrive}
+                                disabled={isScanning || !driveUrl}
+                                className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all flex items-center justify-center gap-2 min-w-[140px]"
+                            >
+                                {isScanning ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <span>Escanear...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiRefreshCw /> Escanear
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                        <p className="text-xs text-blue-600/70 mt-3 ml-1">
+                            * El escaneo buscará PDFs y portadas automáticamente. Este proceso puede tomar varios segundos.
+                        </p>
                     </div>
 
                     {/* PDFs Section */}

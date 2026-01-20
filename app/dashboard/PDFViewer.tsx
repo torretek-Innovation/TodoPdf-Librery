@@ -50,11 +50,33 @@ interface PageAnnotations {
     highlights: HighlightAnnotation[];
 }
 
+import { offlineStorage } from '@/lib/offline-storage';
+
+// ...
+
 export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId }: PDFViewerProps) {
     const [numPages, setNumPages] = useState<number>(0);
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [scale, setScale] = useState<number>(1.0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    // Offline / Internal URL State
+    const [internalPdfUrl, setInternalPdfUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (pdfId) {
+            offlineStorage.getPDF(pdfId).then((record) => {
+                if (record?.blob) {
+                    const url = URL.createObjectURL(record.blob);
+                    setInternalPdfUrl(url);
+                }
+            }).catch(console.error);
+        }
+        return () => {
+            // Cleanup object URL if exists
+            if (internalPdfUrl) URL.revokeObjectURL(internalPdfUrl);
+        };
+    }, [pdfId]);
 
     // Estado de las herramientas
     const [toolMode, setToolMode] = useState<ToolMode>('cursor');
@@ -295,7 +317,7 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId }: PDF
                         )}
 
                         <Document
-                            file={pdfUrl}
+                            file={internalPdfUrl || pdfUrl}
                             onLoadSuccess={({ numPages }) => { setNumPages(numPages); setIsLoading(false); }}
                             loading={null}
                             className="relative shadow-2xl"

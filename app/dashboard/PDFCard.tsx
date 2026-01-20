@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { FiFile, FiStar, FiTrash2, FiMoreVertical, FiEye, FiEdit, FiFolder } from 'react-icons/fi';
+import { FiFile, FiStar, FiTrash2, FiMoreVertical, FiEye, FiEdit, FiFolder, FiDownload, FiCheck, FiClock } from 'react-icons/fi';
 import EditPDFModal from './EditPDFModal';
 import { useToast } from '../providers/ToastProvider';
+import { offlineStorage } from '@/lib/offline-storage';
 
 interface PDFCardProps {
     id?: string;
@@ -55,6 +56,42 @@ export default function PDFCard({
 
     const [showEditModal, setShowEditModal] = useState(false);
 
+    // Offline State
+    const [isDownloaded, setIsDownloaded] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    useEffect(() => {
+        if (id) {
+            offlineStorage.isSaved(id).then(setIsDownloaded).catch(() => { });
+        }
+    }, [id]);
+
+    const handleDownloadOffline = async () => {
+        if (!id || !filePath) return;
+
+        setIsDownloading(true);
+        try {
+            // Use proxy to get blob
+            const fileUrl = filePath.startsWith('http')
+                ? `/api/proxy/pdf?url=${encodeURIComponent(filePath)}`
+                : filePath;
+
+            const res = await fetch(fileUrl);
+            if (!res.ok) throw new Error('Error al descargar archivo');
+
+            const blob = await res.blob();
+            await offlineStorage.savePDF(id, blob);
+
+            setIsDownloaded(true);
+            showToast('Libro descargado para lectura offline', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast('Error en la descarga offline', 'error');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     const handleOpen = () => {
         if (onOpen) {
             onOpen();
@@ -95,17 +132,20 @@ export default function PDFCard({
                         <FiFile size={56} className="text-gray-300 group-hover:text-[#4F6FFF] transition-colors duration-300" />
                     )}
 
+                    {/* Offline Badge */}
+                    {isDownloaded && (
+                        <div className="absolute top-2 left-2 bg-green-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm backdrop-blur-sm flex items-center gap-1 z-10 pointer-events-none">
+                            <FiCheck size={10} /> OFFLINE
+                        </div>
+                    )}
                 </div>
 
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        console.log('Favorite button clicked for ID:', id);
                         if (onToggleFavorite) {
                             onToggleFavorite();
-                        } else {
-                            console.error('onToggleFavorite prop is missing');
                         }
                     }}
                     className={`absolute top-3 right-3 p-2 rounded-full shadow-lg transition-all duration-300 z-[100] 
@@ -121,7 +161,6 @@ export default function PDFCard({
                     />
                 </button>
 
-                {/* Info */}
                 {/* Info */}
                 <div className="p-4 bg-white overflow-visible">
                     <div className="flex items-start justify-between gap-2">
@@ -166,10 +205,33 @@ export default function PDFCard({
                             </button>
                             {isMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
+                                    {/* Download Offline Button */}
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            if (onViewDetails) onViewDetails(); // <--- AGREGAR ESTO
+                                            handleDownloadOffline();
+                                            setIsMenuOpen(false);
+                                        }}
+                                        disabled={isDownloaded || isDownloading}
+                                        className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors ${isDownloaded ? 'text-green-600 font-medium' : 'text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        {isDownloading ? (
+                                            <span className="animate-spin w-3 h-3 border-2 border-current rounded-full border-t-transparent" />
+                                        ) : isDownloaded ? (
+                                            <FiCheck size={16} />
+                                        ) : (
+                                            <FiDownload size={16} />
+                                        )}
+                                        {isDownloaded ? 'Descargado' : isDownloading ? 'Bajando...' : 'Descargar Offline'}
+                                    </button>
+
+                                    <hr className="my-1 border-gray-200" />
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (onViewDetails) onViewDetails();
                                             setIsMenuOpen(false);
                                         }}
                                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"

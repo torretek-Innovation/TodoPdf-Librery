@@ -12,6 +12,7 @@ import ExploreView from './ExploreView';
 import MovePDFsModal from './MovePDFsModal';
 import CreateFolderModal from './CreateFolderModal';
 import RenameFolderModal from './RenameFolderModal';
+import SettingsModal from './SettingsModal';
 import PDFFilterNav from './PDFFilterNav';
 import { useToast } from '../providers/ToastProvider';
 
@@ -58,6 +59,7 @@ export default function Dashboard({ userName }: DashboardProps) {
     const [selectedFolderForMove, setSelectedFolderForMove] = useState<string>('');
     const [editingFolder, setEditingFolder] = useState<string | null>(null);
     const [newFolderName, setNewFolderName] = useState('');
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
     const { showToast } = useToast();
 
     // Filtering State
@@ -133,6 +135,15 @@ export default function Dashboard({ userName }: DashboardProps) {
     // Cargar PDFs al montar el componente
     useEffect(() => {
         loadPDFs();
+
+        // Trigger background sync silently
+        fetch('/api/cron/sync', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        }).catch(err => console.log('Sync skipped or failed:', err));
+
     }, []);
 
     // Callback para cuando se sube un nuevo PDF
@@ -236,7 +247,10 @@ export default function Dashboard({ userName }: DashboardProps) {
 
         try {
             const res = await fetch(`/api/folders/${encodeURIComponent(folderName)}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
 
             if (!res.ok) throw new Error('Error al eliminar carpeta');
@@ -321,6 +335,7 @@ export default function Dashboard({ userName }: DashboardProps) {
                         setSelectedCategory(null);
                         setFilterCategory(null);
                     }}
+                    onOpenSettings={() => setShowSettingsModal(true)}
                 />
 
 
@@ -583,6 +598,13 @@ export default function Dashboard({ userName }: DashboardProps) {
                     loadPDFs();
                     setEditingFolder(null);
                 }}
+            />
+
+            {/* Modal de Configuración */}
+            <SettingsModal
+                isOpen={showSettingsModal}
+                onClose={() => setShowSettingsModal(false)}
+                userName={userName}
             />
         </div >
     );

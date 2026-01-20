@@ -27,7 +27,10 @@ export default function CreateFolderModal({ isOpen, onClose, onSuccess }: Create
         try {
             const res = await fetch('/api/folders', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({ folderName: folderName.trim() })
             });
 

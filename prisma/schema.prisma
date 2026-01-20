@@ -13,6 +13,13 @@ model User {
   id            Int               @id @default(autoincrement())
   username      String            @unique
   passwordHash  String            @map("password_hash")
+  email         String?           @unique
+  avatarPath    String?           @map("avatar_path")
+  theme         String            @default("light")
+  language      String            @default("es")
+  notifications Boolean           @default(true)
+  driveWatchUrl String?           @map("drive_watch_url")
+  lastSyncedAt  DateTime?         @map("last_synced_at")
   createdAt     DateTime          @default(now()) @map("created_at")
   
   pdfs          Pdf[]
