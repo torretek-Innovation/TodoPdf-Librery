@@ -5,9 +5,11 @@ import { FiHome, FiGrid, FiStar, FiClock, FiSettings, FiCompass, FiFile, FiFolde
 interface SidebarProps {
     activeTab: string;
     onTabChange: (tab: string) => void;
+    isCollapsed: boolean;
+    onToggle: () => void;
 }
 
-export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle }: SidebarProps) {
     const menuItems = [
         { id: 'home', label: 'Inicio', icon: FiHome },
         { id: 'pdfs', label: 'Libros', icon: FiFile },
@@ -18,16 +20,27 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     ];
 
     return (
-        <aside className="w-20 bg-white/80 backdrop-blur-md border-r border-white/20 flex flex-col items-center py-6 shadow-lg">
-            {/* Logo */}
-            <div className="mb-8">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#4F6FFF] to-[#8B5CF6] rounded-2xl flex items-center justify-center shadow-lg">
+        <aside
+            className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white/80 backdrop-blur-md border-r border-white/20 flex flex-col py-6 shadow-lg transition-all duration-300 ease-in-out`}
+        >
+            {/* Toggle / Logo */}
+            <div className={`mb-8 flex ${isCollapsed ? 'justify-center' : 'px-6'}`}>
+                <button
+                    onClick={onToggle}
+                    className="w-12 h-12 bg-gradient-to-br from-[#4F6FFF] to-[#8B5CF6] rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+                >
                     <FiMenu size={24} className="text-white" />
-                </div>
+                </button>
+                {!isCollapsed && (
+                    <div className="ml-3 flex flex-col justify-center animate-fade-in-left">
+                        <span className="font-bold text-gray-800 text-lg leading-tight">TodoPDF</span>
+                        <span className="text-[10px] text-gray-500 font-medium">Gestor Inteligente</span>
+                    </div>
+                )}
             </div>
 
             {/* Menu Items */}
-            <nav className="flex-1 flex flex-col items-center gap-4">
+            <nav className="flex-1 flex flex-col gap-2 px-3">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.id;
@@ -36,35 +49,55 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                         <button
                             key={item.id}
                             onClick={() => onTabChange(item.id)}
-                            className={`group relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${isActive
+                            className={`group relative flex items-center p-3 rounded-xl transition-all duration-300 ${isActive
                                 ? 'bg-gradient-to-br from-[#4F6FFF] to-[#3D5AE6] text-white shadow-lg shadow-blue-500/30'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#4F6FFF]'
-                                }`}
-                            title={item.label}
+                                : 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-[#4F6FFF]'
+                                } ${isCollapsed ? 'justify-center' : ''}`}
+                            title={isCollapsed ? item.label : ''}
                         >
-                            <Icon size={20} />
-
-                            {/* Tooltip */}
-                            <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                                {item.label}
+                            <div className={`${isCollapsed ? '' : 'min-w-[24px]'}`}>
+                                <Icon size={20} />
                             </div>
+
+                            {!isCollapsed && (
+                                <span className="ml-3 font-medium text-sm whitespace-nowrap overflow-hidden transition-all duration-300 animate-fade-in-left">
+                                    {item.label}
+                                </span>
+                            )}
+
+                            {/* Tooltip (Only when collapsed) */}
+                            {isCollapsed && (
+                                <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                                    {item.label}
+                                </div>
+                            )}
                         </button>
                     );
                 })}
             </nav>
 
             {/* Settings */}
-            <div className="mt-auto">
+            <div className="mt-auto px-3">
                 <button
-                    className="w-12 h-12 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#4F6FFF] flex items-center justify-center transition-all duration-300 group relative"
-                    title="Configuración"
+                    className={`flex items-center p-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#4F6FFF] transition-all duration-300 group relative ${isCollapsed ? 'justify-center w-full' : 'w-full'}`}
+                    title={isCollapsed ? "Configuración" : ""}
                 >
-                    <FiSettings size={20} />
+                    <div className={`${isCollapsed ? '' : 'min-w-[24px]'}`}>
+                        <FiSettings size={20} />
+                    </div>
+
+                    {!isCollapsed && (
+                        <span className="ml-3 font-medium text-sm whitespace-nowrap overflow-hidden animate-fade-in-left">
+                            Configuración
+                        </span>
+                    )}
 
                     {/* Tooltip */}
-                    <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                        Configuración
-                    </div>
+                    {isCollapsed && (
+                        <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                            Configuración
+                        </div>
+                    )}
                 </button>
             </div>
         </aside>

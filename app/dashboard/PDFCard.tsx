@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { FiFile, FiStar, FiTrash2, FiMoreVertical, FiEye, FiEdit, FiFolder, FiDownload, FiCheck, FiClock } from 'react-icons/fi';
+import { FiFile, FiStar, FiTrash2, FiMoreVertical, FiEye, FiEdit, FiFolder, FiDownload, FiCheck, FiClock, FiFileText } from 'react-icons/fi';
 import EditPDFModal from './EditPDFModal';
+import AnnotationsModal from './AnnotationsModal';
 import { useToast } from '../providers/ToastProvider';
 import { offlineStorage } from '@/lib/offline-storage';
 
@@ -15,6 +16,7 @@ interface PDFCardProps {
     filePath: string;
     isFavorite?: boolean;
     onOpen?: () => void;
+    onOpenWithPage?: (page: number) => void;
     onViewDetails?: () => void;
     category?: string;
     folderName?: string;
@@ -40,6 +42,7 @@ export default function PDFCard({
     filePath,
     isFavorite = false,
     onOpen,
+    onOpenWithPage,
     category = 'Sin categoría',
     totalPages = 0,
     readingProgress = 0,
@@ -57,6 +60,7 @@ export default function PDFCard({
     const { showToast } = useToast();
 
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showAnnotationsModal, setShowAnnotationsModal] = useState(false);
 
     // Offline State
     const [isDownloaded, setIsDownloaded] = useState(false);
@@ -245,6 +249,18 @@ export default function PDFCard({
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            setShowAnnotationsModal(true);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                                    >
+                                        <FiFileText size={16} />
+                                        Ver anotaciones
+                                    </button>
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             setShowEditModal(true);
                                             setIsMenuOpen(false);
                                         }}
@@ -308,6 +324,24 @@ export default function PDFCard({
                             console.error('Error en onSave:', error);
                             showToast('Error al guardar los cambios', 'error');
                         }
+                    }}
+                />
+            )}
+
+            {showAnnotationsModal && id && (
+                <AnnotationsModal
+                    isOpen={showAnnotationsModal}
+                    onClose={() => setShowAnnotationsModal(false)}
+                    pdfId={id}
+                    pdfTitle={title}
+                    onNavigateToPage={(page) => {
+                        // Usar onOpenWithPage si está disponible, sino usar onOpen
+                        if (onOpenWithPage) {
+                            onOpenWithPage(page);
+                        } else if (onOpen) {
+                            onOpen();
+                        }
+                        setShowAnnotationsModal(false);
                     }}
                 />
             )}

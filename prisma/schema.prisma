@@ -47,6 +47,7 @@ model Pdf {
   categories      PdfCategory[]
   favorites       Favorite[]
   readingProgress ReadingProgress[]
+  annotations     Annotation[]
 
   @@index([userId], name: "idx_pdfs_user")
   @@index([userId, deletedAt], name: "idx_pdfs_user_deleted")
@@ -119,4 +120,25 @@ model ExternalLibrary {
 
   @@index([userId], name: "idx_ext_lib_user")
   @@map("external_libraries")
+}
+
+model Annotation {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique
+  pdfId     Int      @map("pdf_id")
+  page      Int
+  type      String   // 'text', 'highlight', 'sticky_note'
+  x         Float
+  y         Float
+  width     Float?
+  height    Float?
+  text      String?  @map("text_content")
+  color     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  pdf       Pdf      @relation(fields: [pdfId], references: [id], onDelete: Cascade)
+
+  @@index([pdfId, page], name: "idx_annotations_pdf_page")
+  @@map("annotations")
 }

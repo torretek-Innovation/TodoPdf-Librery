@@ -16,6 +16,8 @@ import RenameFolderModal from './RenameFolderModal';
 import SettingsModal from './SettingsModal';
 import PDFFilterNav from './PDFFilterNav';
 import { useToast } from '../providers/ToastProvider';
+import { TTSProvider } from '../context/TTSContext';
+import MiniPlayer from './MiniPlayer';
 
 // Importar PDFViewer solo en el cliente para evitar errores de SSR
 const PDFViewer = dynamic(() => import('./PDFViewer'), {
@@ -32,6 +34,7 @@ const PDFViewer = dynamic(() => import('./PDFViewer'), {
 
 interface DashboardProps {
     userName: string;
+    userImage?: string;
     onUpdateUser: (name: string) => void;
 }
 
@@ -48,10 +51,12 @@ interface PDF {
     folderName?: string;
     isFavorite?: boolean;
     readingProgress?: number;
+    initialPage?: number;
 }
 
-export default function Dashboard({ userName, onUpdateUser }: DashboardProps) {
+export default function Dashboard({ userName, userImage, onUpdateUser }: DashboardProps) {
     const [activeTab, setActiveTab] = useState('home');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [pdfs, setPdfs] = useState<PDF[]>([]);
     const [allPdfs, setAllPdfs] = useState<PDF[]>([]); // Include placeholders for folder counting
     const [isLoading, setIsLoading] = useState(true);
@@ -197,8 +202,8 @@ export default function Dashboard({ userName, onUpdateUser }: DashboardProps) {
     };
 
     // Función para abrir el visor de PDF
-    const handleOpenPdf = (pdf: PDF) => {
-        setSelectedPdf(pdf);
+    const handleOpenPdf = (pdf: PDF, initialPage?: number) => {
+        setSelectedPdf({ ...pdf, initialPage });
         setIsViewerOpen(true);
     };
 
@@ -327,293 +332,316 @@ export default function Dashboard({ userName, onUpdateUser }: DashboardProps) {
     };
 
     return (
-        <div className="flex h-screen bg-gradient-to-br from-[#E8F0FF] via-[#B8D0FF] to-[#4F6FFF] overflow-hidden">
-            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <Header
-                    userName={userName}
-                    onPdfUploaded={handlePdfUploaded}
-                    onNavigate={(tab) => {
-                        setActiveTab(tab);
-                        // Reset filters when navigating via header
-                        setSelectedCategory(null);
-                        setFilterCategory(null);
-                    }}
-                    onOpenSettings={() => setShowSettingsModal(true)}
+        <TTSProvider>
+            <div className="flex h-screen bg-gradient-to-br from-[#E8F0FF] via-[#B8D0FF] to-[#4F6FFF] overflow-hidden">
+                <Sidebar
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    isCollapsed={isSidebarCollapsed}
+                    onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                 />
 
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <Header
+                        userName={userName}
+                        userImage={userImage}
+                        onPdfUploaded={handlePdfUploaded}
+                        onNavigate={(tab) => {
+                            setActiveTab(tab);
+                            // Reset filters when navigating via header
+                            setSelectedCategory(null);
+                            setFilterCategory(null);
+                        }}
+                        onOpenSettings={() => setShowSettingsModal(true)}
+                    />
 
-                <main className="flex-1 overflow-y-auto p-6">
-                    {activeTab === 'explore' ? (
-                        <ExploreView onPdfAdded={loadPDFs} />
-                    ) : activeTab === 'home' ? (
-                        <StatsView pdfs={pdfs} userName={userName} />
-                    ) : activeTab === 'trash' ? (
-                        <TrashView onRestore={loadPDFs} />
-                    ) : (
-                        <div className="max-w-7xl mx-auto">
-                            <div className="mb-6 flex items-center gap-4">
-                                {activeTab === 'folders' && selectedCategory && (
-                                    <button
-                                        onClick={() => setSelectedCategory(null)}
-                                        className="p-2 hover:bg-white rounded-full transition-colors text-gray-600"
-                                    >
-                                        <FiArrowLeft size={24} />
-                                    </button>
-                                )}
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-800">
-                                        {activeTab === 'favorites' ? 'Mis Favoritos' :
-                                            activeTab === 'folders' ? (selectedCategory || 'Carpetas') :
-                                                'Mis Libros'}
-                                    </h2>
-                                    <p className="text-gray-600 mt-1">
-                                        {activeTab === 'favorites'
-                                            ? `Tus documentos destacados (${pdfs.filter(p => p.isFavorite).length})`
-                                            : activeTab === 'folders' && !selectedCategory
-                                                ? 'Explora tus documentos por carpetas'
-                                                : `Gestiona y organiza tus documentos`
-                                        }
-                                    </p>
-                                </div>
-                            </div>
 
-                            {isLoading ? (
-                                <div className="text-center py-20">
-                                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#4F6FFF]"></div>
-                                    <p className="text-gray-600 mt-4">Cargando PDFs...</p>
+                    <main className="flex-1 overflow-y-auto p-6">
+                        {activeTab === 'explore' ? (
+                            <ExploreView onPdfAdded={loadPDFs} />
+                        ) : activeTab === 'home' ? (
+                            <StatsView pdfs={pdfs} userName={userName} />
+                        ) : activeTab === 'trash' ? (
+                            <TrashView onRestore={loadPDFs} />
+                        ) : (
+                            <div className="max-w-7xl mx-auto">
+                                <div className="mb-6 flex items-center gap-4">
+                                    {activeTab === 'folders' && selectedCategory && (
+                                        <button
+                                            onClick={() => setSelectedCategory(null)}
+                                            className="p-2 hover:bg-white rounded-full transition-colors text-gray-600"
+                                        >
+                                            <FiArrowLeft size={24} />
+                                        </button>
+                                    )}
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-800">
+                                            {activeTab === 'favorites' ? 'Mis Favoritos' :
+                                                activeTab === 'folders' ? (selectedCategory || 'Carpetas') :
+                                                    'Mis Libros'}
+                                        </h2>
+                                        <p className="text-gray-600 mt-1">
+                                            {activeTab === 'favorites'
+                                                ? `Tus documentos destacados (${pdfs.filter(p => p.isFavorite).length})`
+                                                : activeTab === 'folders' && !selectedCategory
+                                                    ? 'Explora tus documentos por carpetas'
+                                                    : `Gestiona y organiza tus documentos`
+                                            }
+                                        </p>
+                                    </div>
                                 </div>
-                            ) : (
-                                <>
-                                    {activeTab === 'folders' && !selectedCategory ? (
-                                        // VISTA DE CARPETAS CON GESTOR
-                                        <div>
-                                            <div className="flex justify-between items-center mb-6">
-                                                <h3 className="text-xl font-bold text-gray-800">Gestor de Carpetas</h3>
-                                                <button
-                                                    onClick={() => setShowCreateFolderModal(true)}
-                                                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
-                                                >
-                                                    <FiPlus /> Nueva Carpeta
-                                                </button>
-                                            </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                                                {Object.entries(allPdfs.reduce((acc, pdf) => {
-                                                    const folder = pdf.folderName?.trim();
-                                                    if (folder) {
-                                                        // Count only real PDFs, not placeholders
-                                                        if (pdf.title !== '.folder_placeholder') {
-                                                            acc[folder] = (acc[folder] || 0) + 1;
-                                                        } else if (!acc[folder]) {
-                                                            // If only placeholder exists, show 0
-                                                            acc[folder] = 0;
-                                                        }
-                                                    }
-                                                    return acc;
-                                                }, {} as Record<string, number>)).map(([folderName, count]) => (
-                                                    <div
-                                                        key={folderName}
-                                                        className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/40 hover:border-[#4F6FFF]/30 hover:shadow-xl hover:shadow-[#4F6FFF]/10 transition-all group flex flex-col items-center justify-center text-center gap-4 animate-fade-in relative"
+
+                                {isLoading ? (
+                                    <div className="text-center py-20">
+                                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#4F6FFF]"></div>
+                                        <p className="text-gray-600 mt-4">Cargando PDFs...</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {activeTab === 'folders' && !selectedCategory ? (
+                                            // VISTA DE CARPETAS CON GESTOR
+                                            <div>
+                                                <div className="flex justify-between items-center mb-6">
+                                                    <h3 className="text-xl font-bold text-gray-800">Gestor de Carpetas</h3>
+                                                    <button
+                                                        onClick={() => setShowCreateFolderModal(true)}
+                                                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
                                                     >
-                                                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setEditingFolder(folderName);
-                                                                    setNewFolderName(folderName);
-                                                                }}
-                                                                className="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
-                                                                title="Renombrar"
-                                                            >
-                                                                <FiEdit2 size={14} />
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleDeleteFolder(folderName);
-                                                                }}
-                                                                className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                                                                title="Eliminar"
-                                                            >
-                                                                <FiTrash2 size={14} />
-                                                            </button>
-                                                        </div>
+                                                        <FiPlus /> Nueva Carpeta
+                                                    </button>
+                                                </div>
+                                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                                    {Object.entries(allPdfs.reduce((acc, pdf) => {
+                                                        const folder = pdf.folderName?.trim();
+                                                        if (folder) {
+                                                            // Count only real PDFs, not placeholders
+                                                            if (pdf.title !== '.folder_placeholder') {
+                                                                acc[folder] = (acc[folder] || 0) + 1;
+                                                            } else if (!acc[folder]) {
+                                                                // If only placeholder exists, show 0
+                                                                acc[folder] = 0;
+                                                            }
+                                                        }
+                                                        return acc;
+                                                    }, {} as Record<string, number>)).map(([folderName, count]) => (
                                                         <div
-                                                            onClick={() => setSelectedCategory(folderName)}
-                                                            className="w-full cursor-pointer"
+                                                            key={folderName}
+                                                            className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/40 hover:border-[#4F6FFF]/30 hover:shadow-xl hover:shadow-[#4F6FFF]/10 transition-all group flex flex-col items-center justify-center text-center gap-4 animate-fade-in relative"
                                                         >
-                                                            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 transition-colors relative mx-auto">
-                                                                <FiFolder size={32} className="text-[#8B5CF6] fill-[#8B5CF6]/20" />
-                                                                <span className="absolute -top-1 -right-1 bg-[#8B5CF6] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                                                                    {count}
-                                                                </span>
+                                                            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setEditingFolder(folderName);
+                                                                        setNewFolderName(folderName);
+                                                                    }}
+                                                                    className="p-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                                                                    title="Renombrar"
+                                                                >
+                                                                    <FiEdit2 size={14} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDeleteFolder(folderName);
+                                                                    }}
+                                                                    className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                                                                    title="Eliminar"
+                                                                >
+                                                                    <FiTrash2 size={14} />
+                                                                </button>
                                                             </div>
-                                                            <h4 className="font-semibold text-gray-800 mt-3 truncate">{folderName}</h4>
-                                                            <p className="text-xs text-gray-500">{count} archivo{count !== 1 ? 's' : ''}</p>
-                                                        </div>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedFolderForMove(folderName);
-                                                                setShowMovePDFsModal(true);
-                                                            }}
-                                                            className="w-full px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
-                                                        >
-                                                            <FiPlus size={12} /> Agregar archivos
-                                                        </button>
-                                                    </div>
-                                                ))}
-
-                                                {Object.keys(allPdfs.reduce((acc, pdf) => {
-                                                    if (pdf.folderName) acc[pdf.folderName] = 1;
-                                                    return acc;
-                                                }, {} as Record<string, number>)).length === 0 && (
-                                                        <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-500 opacity-60">
-                                                            <FiFolder size={64} className="mb-4 text-gray-300" />
-                                                            <p className="text-lg font-medium">No hay carpetas importadas</p>
-                                                            <p className="text-sm">Usa el botón "Importar Carpeta" para organizar tus archivos.</p>
-                                                        </div>
-                                                    )}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        // VISTA DE LISTA DE PDFs
-                                        <>
-                                            {(() => {
-                                                const filteredPDFs = getFilteredAndSortedPDFs();
-                                                const availableCategories = getAvailableCategories();
-
-                                                return (
-                                                    <div>
-                                                        <PDFFilterNav
-                                                            categories={availableCategories}
-                                                            selectedCategory={filterCategory}
-                                                            onSelectCategory={setFilterCategory}
-                                                            searchTerm={searchTerm}
-                                                            onSearchChange={setSearchTerm}
-                                                            sortBy={sortBy}
-                                                            onSortChange={setSortBy}
-                                                        />
-
-                                                        {filteredPDFs.length === 0 ? (
-                                                            <div className="text-center py-20">
-                                                                <div className="text-6xl mb-4">📄</div>
-                                                                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                                                                    No se encontraron documentos
-                                                                </h3>
-                                                                <p className="text-gray-500">
-                                                                    Intenta ajustar los filtros o tu búsqueda
-                                                                </p>
+                                                            <div
+                                                                onClick={() => setSelectedCategory(folderName)}
+                                                                className="w-full cursor-pointer"
+                                                            >
+                                                                <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 transition-colors relative mx-auto">
+                                                                    <FiFolder size={32} className="text-[#8B5CF6] fill-[#8B5CF6]/20" />
+                                                                    <span className="absolute -top-1 -right-1 bg-[#8B5CF6] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                                                        {count}
+                                                                    </span>
+                                                                </div>
+                                                                <h4 className="font-semibold text-gray-800 mt-3 truncate">{folderName}</h4>
+                                                                <p className="text-xs text-gray-500">{count} archivo{count !== 1 ? 's' : ''}</p>
                                                             </div>
-                                                        ) : (
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                                                {filteredPDFs.map((pdf) => (
-                                                                    <PDFCard
-                                                                        key={pdf.id}
-                                                                        id={pdf.id}
-                                                                        title={pdf.title}
-                                                                        size={formatFileSize(pdf.size)}
-                                                                        date={formatDate(pdf.uploadDate)}
-                                                                        uploadDate={pdf.uploadDate}
-                                                                        filePath={pdf.filePath}
-                                                                        isFavorite={pdf.isFavorite}
-                                                                        category={pdf.category}
-                                                                        totalPages={pdf.totalPages}
-                                                                        readingProgress={pdf.readingProgress}
-                                                                        coverImage={pdf.coverImage}
-                                                                        onToggleFavorite={() => toggleFavorite(pdf.id)}
-                                                                        onOpen={() => handleOpenPdf(pdf)}
-                                                                        onUpdate={(updatedData) => handleUpdatePdf(pdf.id, updatedData)}
-                                                                        onDelete={() => handleDeletePdf(pdf.id)}
-                                                                        onViewDetails={() => setDeatilspdf(pdf)}
-                                                                    />
-                                                                ))}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedFolderForMove(folderName);
+                                                                    setShowMovePDFsModal(true);
+                                                                }}
+                                                                className="w-full px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                                            >
+                                                                <FiPlus size={12} /> Agregar archivos
+                                                            </button>
+                                                        </div>
+                                                    ))}
+
+                                                    {Object.keys(allPdfs.reduce((acc, pdf) => {
+                                                        if (pdf.folderName) acc[pdf.folderName] = 1;
+                                                        return acc;
+                                                    }, {} as Record<string, number>)).length === 0 && (
+                                                            <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-500 opacity-60">
+                                                                <FiFolder size={64} className="mb-4 text-gray-300" />
+                                                                <p className="text-lg font-medium">No hay carpetas importadas</p>
+                                                                <p className="text-sm">Usa el botón "Importar Carpeta" para organizar tus archivos.</p>
                                                             </div>
                                                         )}
-                                                    </div>
-                                                );
-                                            })()}
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    )}
-                </main>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            // VISTA DE LISTA DE PDFs
+                                            <>
+                                                {(() => {
+                                                    const filteredPDFs = getFilteredAndSortedPDFs();
+                                                    const availableCategories = getAvailableCategories();
+
+                                                    return (
+                                                        <div>
+                                                            <PDFFilterNav
+                                                                categories={availableCategories}
+                                                                selectedCategory={filterCategory}
+                                                                onSelectCategory={setFilterCategory}
+                                                                searchTerm={searchTerm}
+                                                                onSearchChange={setSearchTerm}
+                                                                sortBy={sortBy}
+                                                                onSortChange={setSortBy}
+                                                            />
+
+                                                            {filteredPDFs.length === 0 ? (
+                                                                <div className="text-center py-20">
+                                                                    <div className="text-6xl mb-4">📄</div>
+                                                                    <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                                                                        No se encontraron documentos
+                                                                    </h3>
+                                                                    <p className="text-gray-500">
+                                                                        Intenta ajustar los filtros o tu búsqueda
+                                                                    </p>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                                                    {filteredPDFs.map((pdf) => (
+                                                                        <PDFCard
+                                                                            key={pdf.id}
+                                                                            id={pdf.id}
+                                                                            title={pdf.title}
+                                                                            size={formatFileSize(pdf.size)}
+                                                                            date={formatDate(pdf.uploadDate)}
+                                                                            uploadDate={pdf.uploadDate}
+                                                                            filePath={pdf.filePath}
+                                                                            isFavorite={pdf.isFavorite}
+                                                                            category={pdf.category}
+                                                                            totalPages={pdf.totalPages}
+                                                                            readingProgress={pdf.readingProgress}
+                                                                            coverImage={pdf.coverImage}
+                                                                            onToggleFavorite={() => toggleFavorite(pdf.id)}
+                                                                            onOpen={() => handleOpenPdf(pdf)}
+                                                                            onOpenWithPage={(page) => handleOpenPdf(pdf, page)}
+                                                                            onUpdate={(updatedData) => handleUpdatePdf(pdf.id, updatedData)}
+                                                                            onDelete={() => handleDeletePdf(pdf.id)}
+                                                                            onViewDetails={() => setDeatilspdf(pdf)}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </main>
+                </div >
+
+                {/* PDF Viewer Modal */}
+                {
+                    selectedPdf && (
+                        <PDFViewer
+                            isOpen={isViewerOpen}
+                            onClose={handleClosePdf}
+                            pdfUrl={selectedPdf.filePath}
+                            title={selectedPdf.title}
+                            pdfId={selectedPdf.id}
+                            initialPage={selectedPdf.initialPage ?? undefined}
+                        />
+                    )
+                }
+
+                {/* Modal de Detalles */}
+                {
+                    detailPdf && (
+                        <PDFDetailsModal
+                            isOpen={!!detailPdf}
+                            onClose={() => setDeatilspdf(null)}
+                            pdf={{
+                                title: detailPdf.title,
+                                size: formatFileSize(detailPdf.size),
+                                uploadDate: detailPdf.uploadDate,
+                                totalPages: detailPdf.totalPages,
+                                category: detailPdf.category,
+                                readingProgress: detailPdf.readingProgress
+                            }}
+                        />
+                    )
+                }
+
+                {/* Modal para mover PDFs a carpeta */}
+                <MovePDFsModal
+                    isOpen={showMovePDFsModal}
+                    onClose={() => setShowMovePDFsModal(false)}
+                    pdfs={pdfs}
+                    targetFolder={selectedFolderForMove}
+                    onSuccess={() => {
+                        loadPDFs();
+                        setShowMovePDFsModal(false);
+                    }}
+                />
+
+                {/* Modal para crear carpeta */}
+                <CreateFolderModal
+                    isOpen={showCreateFolderModal}
+                    onClose={() => setShowCreateFolderModal(false)}
+                    onSuccess={() => {
+                        loadPDFs();
+                        setShowCreateFolderModal(false);
+                    }}
+                />
+
+                {/* Modal para renombrar carpeta */}
+                <RenameFolderModal
+                    isOpen={!!editingFolder}
+                    onClose={() => setEditingFolder(null)}
+                    currentName={editingFolder || ''}
+                    onSuccess={() => {
+                        loadPDFs();
+                        setEditingFolder(null);
+                    }}
+                />
+
+                {/* Modal de Configuración */}
+                <SettingsModal
+                    isOpen={showSettingsModal}
+                    onClose={() => setShowSettingsModal(false)}
+                    userName={userName}
+                    onUpdateUser={onUpdateUser}
+                />
+
+                <MiniPlayer onRestore={(pdfId, page) => {
+                    const pdf = allPdfs.find(p => p.id === pdfId);
+                    if (pdf) {
+                        // but Dashboard is a parent of TTSProvider in the current file structure... wait.
+                        // No, TTSProvider wraps the children inside Dashboard's return, BUT Dashboard component itself cannot use useTTS hooks 
+                        // because it's not a child of the Provider it renders.
+                        // However, MiniPlayer IS a child. MiniPlayer should probably handle the logic or we move TTSProvider up.
+                        // For now, let's assume we handle it here by finding the PDF.
+                        // The BEST way: MiniPlayer's onRestore should provide all needed info.
+                        handleOpenPdf(pdf);
+                    }
+                }} />
             </div >
-
-            {/* PDF Viewer Modal */}
-            {
-                selectedPdf && (
-                    <PDFViewer
-                        isOpen={isViewerOpen}
-                        onClose={handleClosePdf}
-                        pdfUrl={selectedPdf.filePath}
-                        title={selectedPdf.title}
-                        pdfId={selectedPdf.id}
-                    />
-                )
-            }
-
-            {/* Modal de Detalles */}
-            {
-                detailPdf && (
-                    <PDFDetailsModal
-                        isOpen={!!detailPdf}
-                        onClose={() => setDeatilspdf(null)}
-                        pdf={{
-                            title: detailPdf.title,
-                            size: formatFileSize(detailPdf.size),
-                            uploadDate: detailPdf.uploadDate,
-                            totalPages: detailPdf.totalPages,
-                            category: detailPdf.category,
-                            readingProgress: detailPdf.readingProgress
-                        }}
-                    />
-                )
-            }
-
-            {/* Modal para mover PDFs a carpeta */}
-            <MovePDFsModal
-                isOpen={showMovePDFsModal}
-                onClose={() => setShowMovePDFsModal(false)}
-                pdfs={pdfs}
-                targetFolder={selectedFolderForMove}
-                onSuccess={() => {
-                    loadPDFs();
-                    setShowMovePDFsModal(false);
-                }}
-            />
-
-            {/* Modal para crear carpeta */}
-            <CreateFolderModal
-                isOpen={showCreateFolderModal}
-                onClose={() => setShowCreateFolderModal(false)}
-                onSuccess={() => {
-                    loadPDFs();
-                    setShowCreateFolderModal(false);
-                }}
-            />
-
-            {/* Modal para renombrar carpeta */}
-            <RenameFolderModal
-                isOpen={!!editingFolder}
-                onClose={() => setEditingFolder(null)}
-                currentName={editingFolder || ''}
-                onSuccess={() => {
-                    loadPDFs();
-                    setEditingFolder(null);
-                }}
-            />
-
-            {/* Modal de Configuración */}
-            <SettingsModal
-                isOpen={showSettingsModal}
-                onClose={() => setShowSettingsModal(false)}
-                userName={userName}
-                onUpdateUser={onUpdateUser}
-            />
-        </div >
+        </TTSProvider>
     );
 }

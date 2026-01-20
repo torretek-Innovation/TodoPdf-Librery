@@ -9,14 +9,16 @@ import { useToast } from '../providers/ToastProvider';
 
 interface HeaderProps {
     userName: string;
+    userImage?: string;
     onPdfUploaded?: (pdf: any) => void;
     onNavigate: (tab: string) => void;
     onOpenSettings: () => void;
 }
 
-export default function Header({ userName, onPdfUploaded, onNavigate, onOpenSettings }: HeaderProps) {
+export default function Header({ userName, userImage, onPdfUploaded, onNavigate, onOpenSettings }: HeaderProps) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const { showToast, notifications, markAsRead, clearNotifications, unreadCount } = useToast();
 
     // Search State
@@ -414,9 +416,18 @@ export default function Header({ userName, onPdfUploaded, onNavigate, onOpenSett
                             onClick={() => setShowUserMenu(!showUserMenu)}
                             className="flex items-center gap-3 focus:outline-none"
                         >
-                            <div className="w-10 h-10 bg-gradient-to-br from-[#4F6FFF] to-[#8B5CF6] rounded-full flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-shadow">
-                                <FiUser size={20} />
-                            </div>
+                            {userImage && !imageError ? (
+                                <img
+                                    src={userImage}
+                                    alt={userName}
+                                    className="w-10 h-10 rounded-full object-cover shadow-lg hover:shadow-xl transition-shadow border-2 border-white/50"
+                                    onError={() => setImageError(true)}
+                                />
+                            ) : (
+                                <div className="w-10 h-10 bg-gradient-to-br from-[#4F6FFF] to-[#8B5CF6] rounded-full flex items-center justify-center text-white font-semibold shadow-lg hover:shadow-xl transition-shadow">
+                                    <FiUser size={20} />
+                                </div>
+                            )}
                         </button>
                         {/* Dropdown Menu */}
                         {showUserMenu && (
@@ -445,83 +456,85 @@ export default function Header({ userName, onPdfUploaded, onNavigate, onOpenSett
                 </div>
             </div>
             {/* Modal de Importación */}
-            {importStatus.state !== 'idle' && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full m-4 transform transition-all scale-100">
-                        {/* Header */}
-                        <div className="text-center mb-6">
-                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 
+            {
+                importStatus.state !== 'idle' && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full m-4 transform transition-all scale-100">
+                            {/* Header */}
+                            <div className="text-center mb-6">
+                                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 
                                 ${importStatus.state === 'uploading' ? 'bg-blue-50 text-blue-500' :
-                                    importStatus.errors.length === 0 ? 'bg-green-50 text-green-500' : 'bg-yellow-50 text-yellow-500'}`}>
+                                        importStatus.errors.length === 0 ? 'bg-green-50 text-green-500' : 'bg-yellow-50 text-yellow-500'}`}>
 
-                                {importStatus.state === 'uploading' ? (
-                                    <FiLoader className="animate-spin" size={32} />
-                                ) : importStatus.errors.length === 0 ? (
-                                    <FiCheckCircle size={32} />
-                                ) : (
-                                    <FiAlertTriangle size={32} />
-                                )}
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800">
-                                {importStatus.state === 'uploading' ? 'Importando Documentos' :
-                                    importStatus.errors.length === 0 ? 'Importación Exitosa' : 'Importación Finalizada'}
-                            </h3>
-                            <p className="text-gray-500 mt-2 text-sm">
-                                {importStatus.state === 'uploading' ? `Procesando: ${importStatus.progress.currentFile}` :
-                                    `Se procesaron ${importStatus.progress.total} archivos`}
-                            </p>
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div className="mb-6">
-                            <div className="flex justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <span>Progreso</span>
-                                <span>{importStatus.progress.total > 0 ? Math.round((importStatus.progress.current / importStatus.progress.total) * 100) : 0}%</span>
-                            </div>
-                            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full rounded-full transition-all duration-300 ease-out
-                                        ${importStatus.state === 'completed'
-                                            ? (importStatus.errors.length > 0 ? 'bg-yellow-500' : 'bg-green-500')
-                                            : 'bg-blue-500 relative overflow-hidden'
-                                        }`}
-                                    style={{ width: `${importStatus.progress.total > 0 ? (importStatus.progress.current / importStatus.progress.total) * 100 : 0}%` }}
-                                >
-                                    {importStatus.state === 'uploading' && (
-                                        <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
+                                    {importStatus.state === 'uploading' ? (
+                                        <FiLoader className="animate-spin" size={32} />
+                                    ) : importStatus.errors.length === 0 ? (
+                                        <FiCheckCircle size={32} />
+                                    ) : (
+                                        <FiAlertTriangle size={32} />
                                     )}
                                 </div>
+                                <h3 className="text-xl font-bold text-gray-800">
+                                    {importStatus.state === 'uploading' ? 'Importando Documentos' :
+                                        importStatus.errors.length === 0 ? 'Importación Exitosa' : 'Importación Finalizada'}
+                                </h3>
+                                <p className="text-gray-500 mt-2 text-sm">
+                                    {importStatus.state === 'uploading' ? `Procesando: ${importStatus.progress.currentFile}` :
+                                        `Se procesaron ${importStatus.progress.total} archivos`}
+                                </p>
                             </div>
-                        </div>
 
-                        {/* Errors List */}
-                        {importStatus.errors.length > 0 && (
-                            <div className="mb-6 max-h-32 overflow-y-auto bg-red-50 rounded-lg p-3 border border-red-100">
-                                <div className="flex items-center gap-2 text-red-700 font-medium text-sm mb-2">
-                                    <FiAlertTriangle size={14} />
-                                    Errores ({importStatus.errors.length})
+                            {/* Progress Bar */}
+                            <div className="mb-6">
+                                <div className="flex justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                    <span>Progreso</span>
+                                    <span>{importStatus.progress.total > 0 ? Math.round((importStatus.progress.current / importStatus.progress.total) * 100) : 0}%</span>
                                 </div>
-                                <ul className="space-y-1">
-                                    {importStatus.errors.map((error, idx) => (
-                                        <li key={idx} className="text-xs text-red-600 truncate" title={error}>{error}</li>
-                                    ))}
-                                </ul>
+                                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full transition-all duration-300 ease-out
+                                        ${importStatus.state === 'completed'
+                                                ? (importStatus.errors.length > 0 ? 'bg-yellow-500' : 'bg-green-500')
+                                                : 'bg-blue-500 relative overflow-hidden'
+                                            }`}
+                                        style={{ width: `${importStatus.progress.total > 0 ? (importStatus.progress.current / importStatus.progress.total) * 100 : 0}%` }}
+                                    >
+                                        {importStatus.state === 'uploading' && (
+                                            <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        )}
 
-                        {/* Actions */}
-                        {importStatus.state === 'completed' && (
-                            <button
-                                onClick={() => setImportStatus(prev => ({ ...prev, state: 'idle', errors: [] }))}
-                                className="w-full py-3 bg-gray-900 hover:bg-black text-white rounded-xl font-medium transition-colors shadow-lg shadow-gray-200"
-                            >
-                                Cerrar y Continuar
-                            </button>
-                        )}
+                            {/* Errors List */}
+                            {importStatus.errors.length > 0 && (
+                                <div className="mb-6 max-h-32 overflow-y-auto bg-red-50 rounded-lg p-3 border border-red-100">
+                                    <div className="flex items-center gap-2 text-red-700 font-medium text-sm mb-2">
+                                        <FiAlertTriangle size={14} />
+                                        Errores ({importStatus.errors.length})
+                                    </div>
+                                    <ul className="space-y-1">
+                                        {importStatus.errors.map((error, idx) => (
+                                            <li key={idx} className="text-xs text-red-600 truncate" title={error}>{error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Actions */}
+                            {importStatus.state === 'completed' && (
+                                <button
+                                    onClick={() => setImportStatus(prev => ({ ...prev, state: 'idle', errors: [] }))}
+                                    className="w-full py-3 bg-gray-900 hover:bg-black text-white rounded-xl font-medium transition-colors shadow-lg shadow-gray-200"
+                                >
+                                    Cerrar y Continuar
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
-        </header>
+                )
+            }
+        </header >
     );
 }
 

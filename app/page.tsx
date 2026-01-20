@@ -10,6 +10,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState('');
+  const [userImage, setUserImage] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +29,32 @@ export default function Home() {
           console.error('Error parsing user data:', error);
         }
       }
+
+      // Fetch fresh profile data
+      fetch('/api/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Failed to load profile');
+        })
+        .then(data => {
+          if (data.username) setUserName(data.username);
+          // Use the avatar path from API if available
+          if (data.avatarPath) {
+            setUserImage(data.avatarPath);
+          } else {
+            // Fallback to default
+            setUserImage('/uploads/avatars/user.png');
+          }
+        })
+        .catch(err => {
+          console.error('Profile fetch error:', err);
+          setUserImage('/uploads/avatars/user.png');
+        });
+
       setIsAuthenticated(true);
     } else {
       setIsAuthenticated(false);
@@ -43,10 +70,10 @@ export default function Home() {
     </div>;
   }
 
-
-
   const handleLogin = (email: string, password: string) => {
     setUserName(email.split('@')[0]);
+    // Set default on login
+    setUserImage('/uploads/avatars/user.png');
     setIsAuthenticated(true);
     setShowAuthModal(false);
   };
@@ -63,5 +90,5 @@ export default function Home() {
     );
   }
 
-  return <Dashboard userName={userName} onUpdateUser={setUserName} />;
+  return <Dashboard userName={userName} onUpdateUser={setUserName} userImage={userImage} />;
 }

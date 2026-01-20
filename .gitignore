@@ -47,3 +47,7 @@ next-env.d.ts
 
 # uploads
 /public/uploads/pdfs
+
+# avatars
+/public/uploads/avatars
+
