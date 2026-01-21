@@ -90,5 +90,5 @@ export default function Home() {
     );
   }
 
-  return <Dashboard userName={userName} onUpdateUser={setUserName} userImage={userImage} />;
+  return <Dashboard userName={userName} onUpdateUser={setUserName} userImage={userImage} onUpdateUserImage={setUserImage} />;
 }

@@ -67,7 +67,7 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
     const [scale, setScale] = useState<number>(1.0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [pdfDocument, setPdfDocument] = useState<any>(null);
-    const { speak, stop, state: ttsState, voice, voices, setVoice, setIsMinimized } = useTTS();
+    const { speak, stop, state: ttsState, voice, voices, setVoice, setIsMinimized, rate, setRate } = useTTS();
 
     // Offline / Internal URL State
     const [internalPdfUrl, setInternalPdfUrl] = useState<string | null>(null);
@@ -97,6 +97,7 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
     // Estado de las herramientas
     const [toolMode, setToolMode] = useState<ToolMode>('cursor');
     const [annotations, setAnnotations] = useState<Record<number, PageAnnotations>>({});
+    const [isAutoReading, setIsAutoReading] = useState(false);
 
     // Referencias para dibujo/resaltado
     const isDrawing = useRef(false);
@@ -339,20 +340,15 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
         return () => clearTimeout(timeoutId);
     }, [pageNumber, numPages, isOpen, pdfId]);
 
-    const handleToggleRead = async () => {
+    const readPage = async (pageNum: number) => {
         if (!pdfDocument) return;
 
-        if (ttsState === 'PLAYING') {
-            stop();
-            return;
-        }
-
         try {
-            const page = await pdfDocument.getPage(pageNumber);
+            const page = await pdfDocument.getPage(pageNum);
             const textContent = await page.getTextContent();
 
             if (!textContent || !textContent.items) {
-                alert('No se pudo extraer texto de esta página.');
+                // alert('No se pudo extraer texto de esta página.'); // Silent fail for auto-read?
                 return;
             }
 
@@ -361,15 +357,43 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
                 .join(' ');
 
             if (!text || !text.trim()) {
-                alert('No se detectó texto legible en esta página.');
+                // alert('No se detectó texto legible en esta página.');
                 return;
             }
 
-            speak(text, { title, pdfId, page: pageNumber });
+            speak(text, {
+                title,
+                pdfId,
+                page: pageNum,
+                onComplete: () => {
+                    if (pageNum < numPages) {
+                        setPageNumber(prev => prev + 1);
+                    } else {
+                        setIsAutoReading(false);
+                    }
+                }
+            });
         } catch (err) {
             console.error('Error al leer PDF:', err);
+            setIsAutoReading(false);
         }
     };
+
+    const handleToggleRead = () => {
+        if (ttsState === 'PLAYING') {
+            stop();
+            setIsAutoReading(false);
+            return;
+        }
+        setIsAutoReading(true);
+    };
+
+    // Auto-read effect
+    useEffect(() => {
+        if (isAutoReading && ttsState === 'IDLE') {
+            readPage(pageNumber);
+        }
+    }, [isAutoReading, pageNumber]); // Depend on pageNumber to trigger next page read
 
     // Manejadores de Teclado y Scroll
     useEffect(() => {
@@ -745,6 +769,22 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
                                         >
                                             Oscuro
                                         </button>
+                                    </div>
+                                </div>
+
+                                {/* Speed Control */}
+                                <div className="pt-4 border-t border-gray-200">
+                                    <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Velocidad</h4>
+                                    <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-wrap">
+                                        {[0.75, 1.0, 1.25, 1.5, 2.0].map(r => (
+                                            <button
+                                                key={r}
+                                                onClick={() => setRate(r)}
+                                                className={`flex-1 min-w-[30px] py-1.5 rounded-md text-xs font-medium transition-colors ${rate === r ? 'bg-white text-[#4F6FFF] shadow-sm' : 'text-gray-500 hover:bg-gray-200'}`}
+                                            >
+                                                {r}x
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 

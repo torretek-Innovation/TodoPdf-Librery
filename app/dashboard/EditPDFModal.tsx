@@ -112,16 +112,16 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
 
     const modalContent = (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden">
+            <div className="bg-white dark:bg-[#1A1D2E] rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden">
 
                 {/* Header */}
-                <div className="px-8 py-6 flex items-center justify-between border-b">
-                    <h2 className="text-xl font-semibold text-gray-900">
+                <div className="px-8 py-6 flex items-center justify-between border-b border-gray-100 dark:border-white/10">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                         Editar documento
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-100 transition"
+                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 dark:text-white transition"
                     >
                         <FiX size={24} />
                     </button>
@@ -132,7 +132,7 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
 
                     {/* Cover */}
                     <div>
-                        <div className="aspect-[3/4] rounded-2xl border bg-gray-100 overflow-hidden relative group">
+                        <div className="aspect-[3/4] rounded-2xl border bg-gray-100 dark:bg-white/5 dark:border-white/10 overflow-hidden relative group">
                             {coverImage ? (
                                 <img
                                     src={coverImage}
@@ -140,14 +140,14 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                                <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-sm">
                                     Sin portada
                                 </div>
                             )}
 
                             <button
                                 onClick={() => setShowImageOptions(!showImageOptions)}
-                                className="absolute bottom-3 right-3 p-2 bg-white rounded-full shadow hover:bg-gray-100 transition"
+                                className="absolute bottom-3 right-3 p-2 bg-white dark:bg-[#1A1D2E] rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition"
                             >
                                 <FiEdit size={16} />
                             </button>
@@ -168,11 +168,11 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                                         value={imageUrl}
                                         onChange={(e) => setImageUrl(e.target.value)}
                                         placeholder="URL de imagen"
-                                        className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                                        className="flex-1 px-3 py-2 border rounded-lg text-sm bg-white dark:bg-white/5 dark:border-white/10 dark:text-white outline-none"
                                     />
                                     <button
                                         onClick={handleImageUrlSubmit}
-                                        className="px-3 py-2 bg-gray-800 text-white rounded-lg"
+                                        className="px-3 py-2 bg-gray-800 dark:bg-white/20 text-white rounded-lg"
                                     >
                                         <FiLink size={16} />
                                     </button>
@@ -194,21 +194,21 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
 
                         {/* Title */}
                         <div>
-                            <label className="text-sm font-medium text-gray-700 mb-1 block">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
                                 Título
                             </label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#4F6FFF]"
+                                className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 dark:bg-white/5 rounded-xl focus:ring-2 focus:ring-[#4F6FFF] outline-none dark:text-white"
                                 placeholder="Nombre del PDF"
                             />
                         </div>
 
                         {/* Category */}
                         <div>
-                            <label className="text-sm font-medium text-gray-700 mb-1 block">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
                                 Categoría
                             </label>
 
@@ -218,7 +218,7 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                                         type="text"
                                         value={newCategoryName}
                                         onChange={(e) => setNewCategoryName(e.target.value)}
-                                        className="flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#4F6FFF]"
+                                        className="flex-1 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#4F6FFF] dark:bg-white/5 dark:border-white/10 dark:text-white"
                                         placeholder="Nueva categoría..."
                                         autoFocus
                                         onKeyDown={(e) => {
@@ -247,9 +247,9 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                                         {/* Custom Dropdown Trigger */}
                                         <div
                                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                            className="w-full px-4 py-3 border rounded-xl flex items-center justify-between cursor-pointer bg-white hover:border-[#4F6FFF] transition-colors"
+                                            className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-xl flex items-center justify-between cursor-pointer bg-white dark:bg-white/5 hover:border-[#4F6FFF] transition-colors"
                                         >
-                                            <span className={category ? 'text-gray-900' : 'text-gray-500'}>
+                                            <span className={category ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
                                                 {category || 'Sin categoría'}
                                             </span>
                                             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +259,7 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
 
                                         {/* Custom Dropdown Menu */}
                                         {isDropdownOpen && (
-                                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto animate-fade-in custom-scrollbar">
+                                            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1A1D2E] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto animate-fade-in custom-scrollbar">
                                                 <div
                                                     onClick={() => {
                                                         setCategory('');
@@ -272,10 +272,10 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                                                 {categories.map((cat) => (
                                                     <div
                                                         key={cat}
-                                                        className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 group"
+                                                        className="flex items-center justify-between px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/5 group"
                                                     >
                                                         <span
-                                                            className="flex-1 cursor-pointer"
+                                                            className="flex-1 cursor-pointer dark:text-gray-200"
                                                             onClick={() => {
                                                                 setCategory(cat);
                                                                 setIsDropdownOpen(false);
@@ -304,7 +304,7 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                                             setIsAddingCategory(true);
                                             setNewCategoryName('');
                                         }}
-                                        className="px-4 py-3 bg-blue-50 text-[#4F6FFF] border border-blue-100 rounded-xl hover:bg-blue-100 transition whitespace-nowrap font-medium flex items-center gap-2"
+                                        className="px-4 py-3 bg-blue-50 dark:bg-white/5 text-[#4F6FFF] dark:text-[#6366F1] border border-blue-100 dark:border-white/10 rounded-xl hover:bg-blue-100 dark:hover:bg-white/10 transition whitespace-nowrap font-medium flex items-center gap-2"
                                     >
                                         <FiPlus size={18} />
                                         Nueva
@@ -316,7 +316,7 @@ export default function EditPDFModal({ isOpen, onClose, pdfData, onSave }: EditP
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-5 border-t flex justify-end">
+                <div className="px-8 py-5 border-t border-gray-200 dark:border-white/10 flex justify-end">
                     <button
                         onClick={handleSave}
                         className="px-10 py-3 bg-[#4F6FFF] text-white rounded-xl font-semibold hover:bg-[#3F5FEF] transition"

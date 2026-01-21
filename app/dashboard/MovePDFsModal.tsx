@@ -65,13 +65,13 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="bg-white dark:bg-[#1A1D2E] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
                 <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white flex justify-between items-center">
                     <div>
                         <h2 className="text-xl font-bold">Agregar a "{targetFolder}"</h2>
                         <p className="text-sm text-purple-100 mt-1">Selecciona los archivos que deseas mover</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
                         <FiX size={24} />
                     </button>
                 </div>
@@ -89,15 +89,15 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
                                     key={pdf.id}
                                     onClick={() => togglePdf(pdf.id)}
                                     className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPdfs.includes(pdf.id)
-                                        ? 'border-purple-500 bg-purple-50'
-                                        : 'border-gray-200 hover:border-purple-300'
+                                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                        : 'border-gray-200 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-500/50'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
-                                            <h3 className="font-medium text-gray-800">{pdf.title}</h3>
+                                            <h3 className="font-medium text-gray-800 dark:text-gray-200">{pdf.title}</h3>
                                             {pdf.folderName && (
-                                                <p className="text-xs text-gray-500 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                     Carpeta actual: {pdf.folderName}
                                                 </p>
                                             )}
@@ -114,14 +114,14 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
                     )}
                 </div>
 
-                <div className="border-t border-gray-200 p-6 bg-gray-50 flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
+                <div className="border-t border-gray-200 dark:border-white/10 p-6 bg-gray-50 dark:bg-[#1e293b] flex justify-between items-center">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                         {selectedPdfs.length} archivo(s) seleccionado(s)
                     </p>
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-colors"
+                            className="px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
                         >
                             Cancelar
                         </button>

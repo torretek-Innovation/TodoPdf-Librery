@@ -71,7 +71,7 @@ export default function PDFFilterNav({
     const sortOptions = customSortOptions || defaultSortOptions;
 
     return (
-        <div className="bg-white/80 backdrop-blur-md border border-white/40 sticky top-0 z-50 rounded-2xl p-4 mb-6 shadow-sm animate-fade-in-down">
+        <div className="bg-white/80 dark:bg-[#1e293b]/90 backdrop-blur-md border border-white/40 dark:border-white/10 sticky top-0 z-50 rounded-2xl p-4 mb-6 shadow-sm animate-fade-in-down">
             <div className="flex flex-col xl:flex-row gap-4 justify-between items-center">
 
                 {/* Search Bar */}
@@ -82,7 +82,7 @@ export default function PDFFilterNav({
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder={placeholder}
-                        className="w-full pl-11 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/20 focus:border-[#4F6FFF] outline-none transition-all"
+                        className="w-full pl-11 pr-4 py-2.5 bg-gray-50/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/20 focus:border-[#4F6FFF] outline-none transition-all dark:text-white dark:placeholder-gray-500"
                     />
                 </div>
 
@@ -94,9 +94,9 @@ export default function PDFFilterNav({
                         <div className="relative w-full sm:min-w-[200px]" ref={categoryRef}>
                             <button
                                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                                className={`w-full px-4 py-2.5 bg-white border rounded-xl flex items-center justify-between transition-all text-sm font-medium ${selectedCategory
-                                    ? 'border-[#4F6FFF] text-[#4F6FFF] bg-[#E8F0FF]/30'
-                                    : 'border-gray-200 text-gray-700 hover:border-[#4F6FFF] hover:text-[#4F6FFF]'
+                                className={`w-full px-4 py-2.5 bg-white dark:bg-white/5 border rounded-xl flex items-center justify-between transition-all text-sm font-medium ${selectedCategory
+                                    ? 'border-[#4F6FFF] text-[#4F6FFF] bg-[#E8F0FF]/30 dark:bg-[#4F6FFF]/10'
+                                    : 'border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:border-[#4F6FFF] hover:text-[#4F6FFF]'
                                     }`}
                             >
                                 <div className="flex items-center gap-2 truncate">
@@ -109,7 +109,7 @@ export default function PDFFilterNav({
                             </button>
 
                             {isCategoryOpen && (
-                                <div className="absolute top-full mt-2 left-0 w-full max-h-64 overflow-y-auto bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[100] animate-fade-in origin-top-left custom-scrollbar">
+                                <div className="absolute top-full mt-2 left-0 w-full max-h-64 overflow-y-auto bg-white dark:bg-[#1A1D2E] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 py-2 z-[100] animate-fade-in origin-top-left custom-scrollbar">
                                     <div className="p-1">
                                         <button
                                             onClick={() => {
@@ -117,8 +117,8 @@ export default function PDFFilterNav({
                                                 setIsCategoryOpen(false);
                                             }}
                                             className={`w-full px-4 py-2 text-left text-sm rounded-lg transition-colors ${selectedCategory === null
-                                                ? 'bg-[#E8F0FF] text-[#4F6FFF] font-medium'
-                                                : 'text-gray-900 hover:bg-gray-50'
+                                                ? 'bg-[#E8F0FF] dark:bg-[#4F6FFF]/20 text-[#4F6FFF] font-medium'
+                                                : 'text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                                                 }`}
                                         >
                                             Todas las categorías
@@ -131,8 +131,8 @@ export default function PDFFilterNav({
                                                     setIsCategoryOpen(false);
                                                 }}
                                                 className={`w-full px-4 py-2 text-left text-sm rounded-lg transition-colors ${selectedCategory === cat
-                                                    ? 'bg-[#E8F0FF] text-[#4F6FFF] font-medium'
-                                                    : 'text-gray-900 hover:bg-gray-50'
+                                                    ? 'bg-[#E8F0FF] dark:bg-[#4F6FFF]/20 text-[#4F6FFF] font-medium'
+                                                    : 'text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                                                     }`}
                                             >
                                                 {cat}
@@ -149,9 +149,9 @@ export default function PDFFilterNav({
                         <div className="relative w-full sm:min-w-[180px]" ref={tagRef}>
                             <button
                                 onClick={() => setIsTagOpen(!isTagOpen)}
-                                className={`w-full px-4 py-2.5 bg-white border rounded-xl flex items-center justify-between transition-all text-sm font-medium ${selectedTag
-                                    ? 'border-purple-500 text-purple-600 bg-purple-50/30'
-                                    : 'border-gray-200 text-gray-700 hover:border-purple-500 hover:text-purple-500'
+                                className={`w-full px-4 py-2.5 bg-white dark:bg-white/5 border rounded-xl flex items-center justify-between transition-all text-sm font-medium ${selectedTag
+                                    ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50/30'
+                                    : 'border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:border-purple-500 hover:text-purple-500'
                                     }`}
                             >
                                 <div className="flex items-center gap-2 truncate">
@@ -164,7 +164,7 @@ export default function PDFFilterNav({
                             </button>
 
                             {isTagOpen && (
-                                <div className="absolute top-full mt-2 left-0 w-full max-h-64 overflow-y-auto bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[100] animate-fade-in origin-top-left custom-scrollbar">
+                                <div className="absolute top-full mt-2 left-0 w-full max-h-64 overflow-y-auto bg-white dark:bg-[#1A1D2E] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 py-2 z-[100] animate-fade-in origin-top-left custom-scrollbar">
                                     <div className="p-1">
                                         <button
                                             onClick={() => {
@@ -172,8 +172,8 @@ export default function PDFFilterNav({
                                                 setIsTagOpen(false);
                                             }}
                                             className={`w-full px-4 py-2 text-left text-sm rounded-lg transition-colors ${selectedTag === null
-                                                ? 'bg-purple-50 text-purple-600 font-medium'
-                                                : 'text-gray-900 hover:bg-gray-50'
+                                                ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-medium'
+                                                : 'text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                                                 }`}
                                         >
                                             Todos los tags
@@ -186,8 +186,8 @@ export default function PDFFilterNav({
                                                     setIsTagOpen(false);
                                                 }}
                                                 className={`w-full px-4 py-2 text-left text-sm rounded-lg transition-colors ${selectedTag === tag
-                                                    ? 'bg-purple-50 text-purple-600 font-medium'
-                                                    : 'text-gray-900 hover:bg-gray-50'
+                                                    ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-medium'
+                                                    : 'text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                                                     }`}
                                             >
                                                 #{tag}
@@ -203,7 +203,7 @@ export default function PDFFilterNav({
                     <div className="relative w-full sm:min-w-[180px]" ref={sortRef}>
                         <button
                             onClick={() => setIsSortOpen(!isSortOpen)}
-                            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl flex items-center justify-between text-gray-700 hover:border-[#4F6FFF] hover:text-[#4F6FFF] transition-all text-sm font-medium"
+                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl flex items-center justify-between text-gray-700 dark:text-gray-200 hover:border-[#4F6FFF] hover:text-[#4F6FFF] transition-all text-sm font-medium"
                         >
                             <span className="truncate">
                                 {sortOptions.find((opt) => opt.value === sortBy)?.label || 'Ordenar por'}
@@ -212,7 +212,7 @@ export default function PDFFilterNav({
                         </button>
 
                         {isSortOpen && (
-                            <div className="absolute top-full mt-2 right-0 w-full bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in origin-top-right">
+                            <div className="absolute top-full mt-2 right-0 w-full bg-white dark:bg-[#1A1D2E] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 py-2 z-50 animate-fade-in origin-top-right">
                                 <div className="p-1">
                                     {sortOptions.map((option) => (
                                         <button
@@ -222,8 +222,8 @@ export default function PDFFilterNav({
                                                 setIsSortOpen(false);
                                             }}
                                             className={`w-full px-4 py-2 text-left text-sm rounded-lg transition-colors ${sortBy === option.value
-                                                ? 'bg-[#E8F0FF] text-[#4F6FFF] font-medium'
-                                                : 'text-gray-700 hover:bg-gray-50'
+                                                ? 'bg-[#E8F0FF] dark:bg-[#4F6FFF]/20 text-[#4F6FFF] font-medium'
+                                                : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                                                 }`}
                                         >
                                             {option.label}

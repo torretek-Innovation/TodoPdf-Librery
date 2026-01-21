@@ -297,7 +297,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
     });
 
     return (
-        <header className="bg-white/80 backdrop-blur-md border-b border-white/20 px-6 py-4 shadow-sm">
+        <header className="bg-white/80 dark:bg-[#1e293b]/90 backdrop-blur-md border-b border-white/20 dark:border-white/10 px-6 py-4 shadow-sm relative z-[60]">
             <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                     <button
@@ -329,7 +329,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
                             }}
                             onFocus={() => setShowSearchResults(true)}
                             placeholder="Buscar módulo (ej: Favoritos, Carpetas...)"
-                            className="w-full pl-11 pr-4 py-2.5 bg-gray-100/50 border border-transparent text-gray-800 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/20 focus:bg-white focus:border-[#4F6FFF] outline-none transition-all placeholder-gray-400 text-sm"
+                            className="w-full pl-11 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-transparent dark:border-white/10 text-gray-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/20 focus:bg-white dark:focus:bg-[#1e293b] focus:border-[#4F6FFF] outline-none transition-all placeholder-gray-400 dark:placeholder-gray-500 text-sm"
                         />
                         {/* Keyboard shortcut hint could go here */}
                     </div>
@@ -341,7 +341,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
-                                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 p-2"
+                                className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#1e293b] rounded-xl shadow-xl border border-gray-100 dark:border-white/10 overflow-hidden z-50 p-2"
                             >
                                 <p className="text-xs font-semibold text-gray-400 px-3 py-2 uppercase tracking-wider">
                                     Navegación del Sistema
@@ -356,13 +356,13 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
                                                         setShowSearchResults(false);
                                                         setSearchTerm('');
                                                     }}
-                                                    className="w-full text-left px-3 py-2 hover:bg-purple-50 rounded-lg flex items-center gap-3 transition-colors group"
+                                                    className="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-white/5 rounded-lg flex items-center gap-3 transition-colors group"
                                                 >
-                                                    <div className="p-2 bg-gray-100 text-gray-500 rounded-lg group-hover:bg-purple-200 group-hover:text-purple-600 transition-colors">
+                                                    <div className="p-2 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 rounded-lg group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                                                         <module.icon size={18} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{module.title}</p>
+                                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">{module.title}</p>
                                                         <p className="text-xs text-gray-400">Ir a {module.title}</p>
                                                     </div>
                                                 </button>
@@ -382,7 +382,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
                 {/* Date and User Section */}
                 <div className="flex items-center gap-6 ml-6">
                     {/* Date */}
-                    <div className="text-sm text-gray-600 font-medium hidden md:block">
+                    <div className="text-sm text-gray-600 dark:text-gray-300 font-medium hidden md:block">
                         {today}
                     </div>
 
@@ -390,7 +390,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
                     <div className="relative" ref={notifRef}>
                         <button
                             onClick={() => setShowNotifications(!showNotifications)}
-                            className={`relative p-2.5 rounded-xl transition-all ${showNotifications ? 'bg-purple-100 text-purple-600' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                            className={`relative p-2.5 rounded-xl transition-all ${showNotifications ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-700 dark:hover:text-white'
                                 }`}
                         >
                             <FiBell size={20} />

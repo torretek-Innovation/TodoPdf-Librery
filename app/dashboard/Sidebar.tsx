@@ -7,9 +7,10 @@ interface SidebarProps {
     onTabChange: (tab: string) => void;
     isCollapsed: boolean;
     onToggle: () => void;
+    onOpenSettings: () => void;
 }
 
-export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle, onOpenSettings }: SidebarProps) {
     const menuItems = [
         { id: 'home', label: 'Inicio', icon: FiHome },
         { id: 'pdfs', label: 'Libros', icon: FiFile },
@@ -21,7 +22,7 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle 
 
     return (
         <aside
-            className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white/80 backdrop-blur-md border-r border-white/20 flex flex-col py-6 shadow-lg transition-all duration-300 ease-in-out`}
+            className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white/80 dark:bg-[#1e293b]/90 backdrop-blur-md border-r border-white/20 dark:border-white/10 flex flex-col py-6 shadow-lg transition-all duration-300 ease-in-out`}
         >
             {/* Toggle / Logo */}
             <div className={`mb-8 flex ${isCollapsed ? 'justify-center' : 'px-6'}`}>
@@ -33,8 +34,8 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle 
                 </button>
                 {!isCollapsed && (
                     <div className="ml-3 flex flex-col justify-center animate-fade-in-left">
-                        <span className="font-bold text-gray-800 text-lg leading-tight">TodoPDF</span>
-                        <span className="text-[10px] text-gray-500 font-medium">Gestor Inteligente</span>
+                        <span className="font-bold text-gray-800 dark:text-white text-lg leading-tight">TodoPDF</span>
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Gestor Inteligente</span>
                     </div>
                 )}
             </div>
@@ -51,7 +52,7 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle 
                             onClick={() => onTabChange(item.id)}
                             className={`group relative flex items-center p-3 rounded-xl transition-all duration-300 ${isActive
                                 ? 'bg-gradient-to-br from-[#4F6FFF] to-[#3D5AE6] text-white shadow-lg shadow-blue-500/30'
-                                : 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-[#4F6FFF]'
+                                : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-[#4F6FFF] dark:hover:text-white'
                                 } ${isCollapsed ? 'justify-center' : ''}`}
                             title={isCollapsed ? item.label : ''}
                         >
@@ -79,7 +80,8 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle 
             {/* Settings */}
             <div className="mt-auto px-3">
                 <button
-                    className={`flex items-center p-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#4F6FFF] transition-all duration-300 group relative ${isCollapsed ? 'justify-center w-full' : 'w-full'}`}
+                    onClick={onOpenSettings}
+                    className={`flex items-center p-3 rounded-xl bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-[#4F6FFF] dark:hover:text-[#4F6FFF] transition-all duration-300 group relative ${isCollapsed ? 'justify-center w-full' : 'w-full'}`}
                     title={isCollapsed ? "Configuración" : ""}
                 >
                     <div className={`${isCollapsed ? '' : 'min-w-[24px]'}`}>

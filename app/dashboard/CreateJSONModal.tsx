@@ -147,7 +147,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white dark:bg-[#1A1D2E] rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
                     <div className="flex justify-between items-start">
@@ -174,7 +174,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                         </button>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                            className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
                         >
                             <FiX size={24} />
                         </button>
@@ -184,7 +184,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {/* Info General */}
-                    <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-5 rounded-2xl border border-purple-100">
+                    <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/10">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                                 <FiInfo className="text-white" size={18} />
@@ -200,7 +200,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                                     type="text"
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                                    className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder-gray-500"
                                     placeholder="Mi Biblioteca de PDFs"
                                 />
                             </div>
@@ -238,7 +238,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                     </div>
 
                     {/* Automation Section */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-5 rounded-2xl border border-blue-100 dark:border-blue-500/10">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                                 <FiRefreshCw className="text-white" size={18} />
@@ -256,7 +256,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                                         type="text"
                                         value={driveUrl}
                                         onChange={(e) => setDriveUrl(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white dark:placeholder-gray-500"
                                         placeholder="https://drive.google.com/drive/folders/..."
                                     />
                                 </div>
@@ -284,7 +284,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                     </div>
 
                     {/* PDFs Section */}
-                    <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-5">
+                    <div className="bg-white dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-5">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-gray-800 flex items-center gap-2">
                                 📚 PDFs <span className="text-sm font-normal text-gray-500">({pdfs.length})</span>
@@ -304,7 +304,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                         ) : (
                             <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                                 {pdfs.map((pdf, index) => (
-                                    <div key={index} className="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-purple-200 transition-colors">
+                                    <div key={index} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 hover:border-purple-200 transition-colors">
                                         <div className="flex justify-between items-center mb-3">
                                             <span className="text-sm font-semibold text-purple-600">PDF #{index + 1}</span>
                                             <button
@@ -316,22 +316,22 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="col-span-2">
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">Nombre *</label>
+                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre *</label>
                                                 <input
                                                     type="text"
                                                     value={pdf.name || ''}
                                                     onChange={(e) => updatePDF(index, 'name', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                                                    className="w-full px-3 py-2 text-sm bg-white dark:bg-[#1A1D2E] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none dark:text-white"
                                                     placeholder="JavaScript Básico"
                                                 />
                                             </div>
                                             <div className="col-span-2">
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">URL de Google Drive *</label>
+                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">URL de Google Drive *</label>
                                                 <input
                                                     type="text"
                                                     value={pdf.url || ''}
                                                     onChange={(e) => updatePDF(index, 'url', e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                                                    className="w-full px-3 py-2 text-sm bg-white dark:bg-[#1A1D2E] border border-gray-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none dark:text-white"
                                                     placeholder="https://drive.google.com/file/d/..."
                                                 />
                                             </div>
@@ -384,11 +384,11 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-gray-200 p-6 bg-gray-50">
+                <div className="border-t border-gray-200 dark:border-white/10 p-6 bg-gray-50 dark:bg-[#1e293b]">
                     <div className="flex justify-end gap-3">
                         <button
                             onClick={onClose}
-                            className="px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-colors"
+                            className="px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors"
                         >
                             Cancelar
                         </button>

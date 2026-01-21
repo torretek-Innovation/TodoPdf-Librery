@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 type TTSState = 'IDLE' | 'PLAYING' | 'PAUSED';
 
 interface TTSContextType {
-    speak: (text: string, metadata?: { title?: string; pdfId?: string; page?: number }) => void;
+    speak: (text: string, metadata?: { title?: string; pdfId?: string; page?: number; onComplete?: () => void }) => void;
     stop: () => void;
     pause: () => void;
     resume: () => void;
@@ -18,6 +18,8 @@ interface TTSContextType {
     isMinimized: boolean;
     setIsMinimized: (val: boolean) => void;
     charIndex: number;
+    rate: number;
+    setRate: (rate: number) => void;
 }
 
 const TTSContext = createContext<TTSContextType | undefined>(undefined);
@@ -29,6 +31,7 @@ export function TTSProvider({ children }: { children: React.ReactNode }) {
     const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
     const [voice, setVoice] = useState<SpeechSynthesisVoice | null>(null);
     const [isMinimized, setIsMinimized] = useState(false);
+    const [rate, setRate] = useState(1.0);
 
     const [charIndex, setCharIndex] = useState(0);
 
@@ -59,7 +62,7 @@ export function TTSProvider({ children }: { children: React.ReactNode }) {
         }
     }, [voice]);
 
-    const speak = (text: string, metadata: { title?: string; pdfId?: string; page?: number } = {}) => {
+    const speak = (text: string, metadata: { title?: string; pdfId?: string; page?: number; onComplete?: () => void } = {}) => {
         if (!synthRef.current) return;
 
         // Cancel previous
@@ -72,6 +75,7 @@ export function TTSProvider({ children }: { children: React.ReactNode }) {
         } else {
             utterance.lang = 'es-ES';
         }
+        utterance.rate = rate; // Apply current rate
 
         utterance.onstart = () => {
             setState('PLAYING');
@@ -88,6 +92,9 @@ export function TTSProvider({ children }: { children: React.ReactNode }) {
             setState('IDLE');
             setIsMinimized(false); // Close mini player when done
             setCharIndex(0);
+            if (metadata.onComplete) {
+                metadata.onComplete();
+            }
         };
         utterance.onerror = (e) => {
             // Ignore interruption errors which happen frequently when switching pages or stopping
@@ -142,6 +149,8 @@ export function TTSProvider({ children }: { children: React.ReactNode }) {
             voice,
             voices,
             setVoice,
+            rate,
+            setRate,
             isMinimized,
             setIsMinimized,
             charIndex

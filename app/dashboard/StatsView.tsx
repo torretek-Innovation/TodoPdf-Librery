@@ -73,13 +73,13 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
 
     // Estilos de tarjetas
     const StatCard = ({ icon: Icon, label, value, subtext, color }: any) => (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white dark:bg-[#1A1D2E] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 hover:shadow-md transition-shadow">
             <div className={`p-3 rounded-xl w-fit mb-4 ${color}`}>
                 <Icon size={24} className="text-white" />
             </div>
-            <h3 className="text-3xl font-bold text-gray-800 mb-1">{value}</h3>
-            <p className="text-gray-500 font-medium mb-1">{label}</p>
-            {subtext && <p className="text-xs text-gray-400">{subtext}</p>}
+            <h3 className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{value}</h3>
+            <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
+            {subtext && <p className="text-xs text-gray-400 dark:text-gray-500">{subtext}</p>}
         </div>
     );
 
@@ -87,10 +87,10 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
         <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
             {/* Bienvenida */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">
-                    Hola, <span className="text-[#4F6FFF]">{userName.includes('@') ? userName.split('@')[0] : userName}</span> 👋
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+                    Hola, <span className="text-[#4F6FFF] dark:text-[#6366F1]">{userName.includes('@') ? userName.split('@')[0] : userName}</span> 👋
                 </h1>
-                <p className="text-gray-500 mt-2">Aquí tienes un resumen de tu actividad de lectura.</p>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">Aquí tienes un resumen de tu actividad de lectura.</p>
             </div>
 
             {/* Grid de Estadísticas Principales */}
@@ -160,10 +160,10 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
                 </div>
 
                 {/* Tarjeta de Racha de Lectura */}
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl p-8 shadow-sm border border-yellow-100 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-3xl p-8 shadow-sm border border-yellow-100 dark:border-yellow-900/30 flex flex-col justify-center items-center text-center relative overflow-hidden">
                     {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/30 rounded-full -mr-16 -mt-16"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-200/30 rounded-full -ml-12 -mb-12"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/30 dark:bg-yellow-500/10 rounded-full -mr-16 -mt-16"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-200/30 dark:bg-orange-500/10 rounded-full -ml-12 -mb-12"></div>
 
                     <div className="relative z-10 w-full">
                         {isLoadingStreak ? (
@@ -176,7 +176,7 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
                                 <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full flex items-center justify-center mb-4 text-3xl mx-auto shadow-lg">
                                     {readingStreak.currentStreak > 0 ? '🔥' : '📚'}
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-800 mb-2">Racha de Lectura</h3>
+                                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Racha de Lectura</h3>
 
                                 {readingStreak.currentStreak > 0 ? (
                                     <>
@@ -184,11 +184,11 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
                                             <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 mb-1">
                                                 {readingStreak.currentStreak}
                                             </p>
-                                            <p className="text-gray-600 text-sm font-medium">
+                                            <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">
                                                 {readingStreak.currentStreak === 1 ? 'día' : 'días'} seguidos
                                             </p>
                                         </div>
-                                        <p className="text-gray-500 text-sm mb-4">
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
                                             ¡Mantén el ritmo! Has leído {readingStreak.totalDaysRead} {readingStreak.totalDaysRead === 1 ? 'día' : 'días'} en total
                                         </p>
                                         {readingStreak.longestStreak > readingStreak.currentStreak && (
@@ -200,7 +200,7 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
                                     </>
                                 ) : (
                                     <>
-                                        <p className="text-gray-600 text-sm mb-6">
+                                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
                                             {readingStreak.totalDaysRead > 0
                                                 ? 'Comienza a leer hoy para iniciar una nueva racha'
                                                 : 'Comienza a leer para iniciar tu racha'}

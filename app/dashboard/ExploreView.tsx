@@ -328,14 +328,14 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                                 setData(null);
                                 setSelectedPdf(null);
                             }}
-                            className="p-2 hover:bg-white/80 rounded-lg transition-colors text-gray-600 hover:text-gray-800"
+                            className="p-2 hover:bg-white/80 dark:hover:bg-white/10 rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
                         >
                             <FiArrowLeft size={24} />
                         </button>
                     )}
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-800 mb-2">Explorar Bibliotecas</h2>
-                        <p className="text-gray-600">
+                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Explorar Bibliotecas</h2>
+                        <p className="text-gray-600 dark:text-gray-400">
                             {data ? `Viendo: ${data.title}` : 'Carga índices JSON desde Google Drive o archivos locales'}
                         </p>
                     </div>
@@ -349,7 +349,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
             </div>
 
             {/* Input Section */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+            <div className="bg-white dark:bg-[#1A1D2E] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-white/10 mb-8">
                 <div className="flex gap-4 mb-4">
                     <div className="relative flex-1">
                         <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -358,13 +358,13 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
                             placeholder="Pega el link del archivo pdf-index.json..."
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-[#11131E] border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all dark:text-white dark:placeholder-gray-500"
                         />
                     </div>
                     <button
                         onClick={() => handleLoad()}
                         disabled={isLoading || !url}
-                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
                     >
                         {isLoading ? <FiLoader className="animate-spin" /> : 'Cargar'}
                     </button>
@@ -383,7 +383,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                     />
                 </div>
                 {error && (
-                    <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-2 text-sm">
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl flex items-center gap-2 text-sm">
                         <FiAlertCircle size={18} />
                         {error}
                     </div>
@@ -393,20 +393,20 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
             {/* Saved Libraries */}
             {savedLibraries.length > 0 && !data && (
                 <div className="mb-8">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">Bibliotecas Guardadas</h3>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Bibliotecas Guardadas</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {savedLibraries.map((lib) => (
                             <div
                                 key={lib.id}
-                                className={`bg-white p-4 rounded-xl border transition-all group cursor-pointer ${lib.id === -1
-                                    ? 'border-blue-300 bg-blue-50/30'
-                                    : 'border-gray-200 hover:border-purple-300'
+                                className={`bg-white dark:bg-[#1A1D2E] p-4 rounded-xl border transition-all group cursor-pointer ${lib.id === -1
+                                    ? 'border-blue-300 bg-blue-50/30 dark:bg-blue-900/10 dark:border-blue-700/30'
+                                    : 'border-gray-200 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-500/50'
                                     }`}
                                 onClick={() => handleLoad(lib.url, lib.content)}
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1">
-                                        <h4 className="font-semibold text-gray-800">{lib.name}</h4>
+                                        <h4 className="font-semibold text-gray-800 dark:text-gray-100">{lib.name}</h4>
                                         {lib.id === -1 && (
                                             <span className="inline-block mt-1 px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
                                                 SISTEMA
@@ -419,13 +419,13 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                                                 e.stopPropagation();
                                                 handleDeleteLibrary(lib.id);
                                             }}
-                                            className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="text-red-500 hover:text-red-700 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                                         >
                                             <FiTrash2 size={16} />
                                         </button>
                                     )}
                                 </div>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {lib.id === -1 ? 'Biblioteca del Sistema' : lib.type === 'LINK' ? 'Desde URL' : 'Archivo local'} • {new Date(lib.createdAt).toLocaleDateString()}
                                 </p>
                             </div>
@@ -438,23 +438,23 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
             {data && (
                 <div className="animate-fade-in">
                     {/* Header Info */}
-                    <div className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-2xl border border-purple-100">
+                    <div className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-2xl border border-purple-100 dark:border-purple-500/10">
                         <div className="flex justify-between items-start">
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-800">{data.title || 'Colección'}</h3>
-                                {data.description && <p className="text-gray-600 mt-1">{data.description}</p>}
-                                {data.version && <span className="text-xs text-gray-500 mt-1 block">v{data.version}</span>}
+                                <h3 className="text-2xl font-bold text-gray-800 dark:text-white">{data.title || 'Colección'}</h3>
+                                {data.description && <p className="text-gray-600 dark:text-gray-300 mt-1">{data.description}</p>}
+                                {data.version && <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">v{data.version}</span>}
                             </div>
                             {data.updatedAt && (
-                                <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200">
+                                <span className="text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-[#1A1D2E] px-3 py-1 rounded-full border border-gray-200 dark:border-white/10">
                                     Actualizado: {new Date(data.updatedAt).toLocaleDateString()}
                                 </span>
                             )}
                         </div>
                         {data.owner && (
-                            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600">
+                            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400">
                                 <span className="font-medium">Por: {data.owner}</span>
-                                {data.source && <span className="text-gray-300">•</span>}
+                                {data.source && <span className="text-gray-300 dark:text-gray-600">•</span>}
                                 {data.source && <span>{data.source}</span>}
                             </div>
                         )}
@@ -515,10 +515,10 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                             .map((pdf) => (
                                 <div
                                     key={pdf.id}
-                                    className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-xl hover:border-purple-200 transition-all group flex flex-col h-full"
+                                    className="bg-white dark:bg-[#1A1D2E] rounded-2xl border border-gray-100 dark:border-white/10 p-4 hover:shadow-xl hover:border-purple-200 dark:hover:border-purple-500/30 transition-all group flex flex-col h-full"
                                 >
                                     <div
-                                        className="aspect-[3/4] bg-gray-100 rounded-xl mb-4 overflow-hidden relative"
+                                        className="aspect-[3/4] bg-gray-100 dark:bg-gray-800 rounded-xl mb-4 overflow-hidden relative"
                                     >
                                         {pdf.image_path ? (
                                             <img src={pdf.image_path} alt={pdf.name} className="w-full h-full object-cover" />
@@ -529,20 +529,20 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                                         )}
                                     </div>
 
-                                    <h4 className="font-bold text-gray-800 truncate mb-1" title={pdf.name}>{pdf.name}</h4>
+                                    <h4 className="font-bold text-gray-800 dark:text-gray-100 truncate mb-1" title={pdf.name}>{pdf.name}</h4>
 
                                     {pdf.description && (
-                                        <p className="text-xs text-gray-500 mb-2 line-clamp-2 flex-1">{pdf.description}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2 flex-1">{pdf.description}</p>
                                     )}
 
                                     <div className="flex flex-wrap gap-1 mb-3">
                                         {pdf.category && (
-                                            <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full font-medium">
+                                            <span className="text-[10px] px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full font-medium">
                                                 {pdf.category}
                                             </span>
                                         )}
                                         {pdf.tags?.slice(0, 2).map((tag, idx) => (
-                                            <span key={idx} className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                                            <span key={idx} className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 rounded-full">
                                                 #{tag}
                                             </span>
                                         ))}
@@ -567,7 +567,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
                                         </button>
                                         <button
                                             onClick={() => handleDownloadPDF(pdf)}
-                                            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded-lg transition-colors"
+                                            className="px-3 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 text-xs rounded-lg transition-colors"
                                         >
                                             <FiDownload size={14} />
                                         </button>

@@ -115,7 +115,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden m-4">
+            <div className="relative w-full max-w-3xl max-h-[85vh] bg-white dark:bg-[#1A1D2E] rounded-2xl shadow-2xl flex flex-col overflow-hidden m-4">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#4F6FFF] to-[#8B5CF6] text-white">
                     <div>
@@ -124,20 +124,20 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                        className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
                     >
                         <FiX size={24} />
                     </button>
                 </div>
 
                 {/* Filtros */}
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
                     <div className="flex gap-2 flex-wrap">
                         <button
                             onClick={() => setFilter('all')}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === 'all'
                                 ? 'bg-[#4F6FFF] text-white shadow-md'
-                                : 'bg-white text-gray-600 hover:bg-gray-100'
+                                : 'bg-white dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/20'
                                 }`}
                         >
                             Todas ({annotations.length})
@@ -146,7 +146,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                             onClick={() => setFilter('text')}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filter === 'text'
                                 ? 'bg-red-500 text-white shadow-md'
-                                : 'bg-white text-gray-600 hover:bg-gray-100'
+                                : 'bg-white dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/20'
                                 }`}
                         >
                             <FiFileText size={16} />
@@ -156,7 +156,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                             onClick={() => setFilter('highlight')}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filter === 'highlight'
                                 ? 'bg-yellow-500 text-white shadow-md'
-                                : 'bg-white text-gray-600 hover:bg-gray-100'
+                                : 'bg-white dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/20'
                                 }`}
                         >
                             <FiEdit3 size={16} />
@@ -166,7 +166,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                             onClick={() => setFilter('sticky_note')}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filter === 'sticky_note'
                                 ? 'bg-blue-500 text-white shadow-md'
-                                : 'bg-white text-gray-600 hover:bg-gray-100'
+                                : 'bg-white dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/20'
                                 }`}
                         >
                             <FiMessageSquare size={16} />
@@ -180,7 +180,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-20">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4F6FFF] mb-4"></div>
-                            <p className="text-gray-600">Cargando anotaciones...</p>
+                            <p className="text-gray-600 dark:text-gray-400">Cargando anotaciones...</p>
                         </div>
                     ) : filteredAnnotations.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -199,7 +199,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                                 <div
                                     key={ann.id}
                                     onClick={() => handleNavigate(ann.page)}
-                                    className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-[#4F6FFF] hover:shadow-lg transition-all cursor-pointer"
+                                    className="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 hover:border-[#4F6FFF] dark:hover:border-[#6366F1] hover:shadow-lg transition-all cursor-pointer"
                                 >
                                     <div className="flex items-start gap-3">
                                         <div className="flex-shrink-0 mt-1">
@@ -207,20 +207,20 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-xs font-semibold text-gray-500 uppercase">
+                                                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                                                     {getTypeLabel(ann.type)}
                                                 </span>
                                                 <span className="text-xs text-gray-400">•</span>
-                                                <span className="text-xs font-medium text-[#4F6FFF]">
+                                                <span className="text-xs font-medium text-[#4F6FFF] dark:text-[#6366F1]">
                                                     Página {ann.page}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-gray-700 line-clamp-2">
+                                            <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">
                                                 {ann.content || '(Sin contenido)'}
                                             </p>
                                         </div>
                                         <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <FiChevronRight className="text-[#4F6FFF]" size={20} />
+                                            <FiChevronRight className="text-[#4F6FFF] dark:text-[#6366F1]" size={20} />
                                         </div>
                                     </div>
                                 </div>
@@ -231,8 +231,8 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
 
                 {/* Footer */}
                 {filteredAnnotations.length > 0 && (
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                        <p className="text-sm text-gray-600 text-center">
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-200 dark:border-white/10">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                             Mostrando {filteredAnnotations.length} de {annotations.length} anotaciones
                         </p>
                     </div>

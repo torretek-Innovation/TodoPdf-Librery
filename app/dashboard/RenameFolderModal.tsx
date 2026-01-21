@@ -62,7 +62,7 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="bg-white dark:bg-[#1A1D2E] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -70,13 +70,13 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
                         </div>
                         <h2 className="text-xl font-bold">Renombrar Carpeta</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
                         <FiX size={24} />
                     </button>
                 </div>
 
                 <div className="p-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Nuevo nombre
                     </label>
                     <input
@@ -85,18 +85,18 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
                         onChange={(e) => setNewName(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleRename()}
                         placeholder="Nombre de la carpeta"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 dark:bg-white/5 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white"
                         autoFocus
                     />
-                    <p className="text-xs text-gray-500 mt-2">
-                        Nombre actual: <span className="font-medium text-gray-700">{currentName}</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        Nombre actual: <span className="font-medium text-gray-700 dark:text-gray-200">{currentName}</span>
                     </p>
                 </div>
 
-                <div className="border-t border-gray-200 p-6 bg-gray-50 flex justify-end gap-3">
+                <div className="border-t border-gray-200 dark:border-white/10 p-6 bg-gray-50 dark:bg-[#1e293b] flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-colors"
+                        className="px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
                     >
                         Cancelar
                     </button>

@@ -17,20 +17,20 @@ export default function NotificationsDropdown({ notifications, onMarkAsRead, onC
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100/50 backdrop-blur-xl z-50 overflow-hidden"
+            className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-[#1A1D2E] rounded-2xl shadow-2xl border border-gray-100/50 dark:border-white/10 backdrop-blur-xl z-50 overflow-hidden"
         >
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 className="font-bold text-gray-800">Notificaciones</h3>
+            <div className="p-4 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
+                <h3 className="font-bold text-gray-800 dark:text-white">Notificaciones</h3>
                 <div className="flex gap-2 text-xs">
                     {notifications.length > 0 && (
                         <button
                             onClick={onClearAll}
-                            className="text-red-500 hover:text-red-700 transition-colors flex items-center gap-1"
+                            className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-1"
                         >
                             <FiTrash2 /> Limpiar
                         </button>
                     )}
-                    <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-400">
+                    <button onClick={onClose} className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-400">
                         <FiX size={16} />
                     </button>
                 </div>
@@ -55,7 +55,7 @@ export default function NotificationsDropdown({ notifications, onMarkAsRead, onC
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
-                                className={`p-4 border-b border-gray-50 flex gap-3 hover:bg-gray-50 transition-colors relative group ${!notif.read ? 'bg-blue-50/30' : ''}`}
+                                className={`p-4 border-b border-gray-50 dark:border-white/5 flex gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-blue-50/30 dark:bg-blue-500/10' : ''}`}
                                 onClick={() => onMarkAsRead(notif.id)}
                             >
                                 <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${!notif.read ? 'bg-blue-500' : 'bg-transparent'
@@ -69,13 +69,13 @@ export default function NotificationsDropdown({ notifications, onMarkAsRead, onC
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <h4 className={`text-sm font-semibold text-gray-800 ${!notif.read ? 'font-bold' : ''}`}>
+                                    <h4 className={`text-sm font-semibold text-gray-800 dark:text-white ${!notif.read ? 'font-bold' : ''}`}>
                                         {notif.title}
                                     </h4>
-                                    <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
                                         {notif.message}
                                     </p>
-                                    <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-400">
+                                    <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-400 dark:text-gray-500">
                                         <FiClock size={10} />
                                         <span>
                                             {new Intl.RelativeTimeFormat('es', { numeric: 'auto' }).format(

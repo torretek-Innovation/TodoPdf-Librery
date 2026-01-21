@@ -22,6 +22,21 @@
   --danger-red: #EF4444;
 }
 
+.dark {
+  /* Dark Theme Colors */
+  --bg-gradient-start: #0F172A;
+  --bg-gradient-end: #1E1B4B;
+  --card-bg: rgba(30, 41, 59, 0.95);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --primary-blue: #6366F1;
+  --primary-blue-dark: #4F46E5;
+  --accent-purple: #A78BFA;
+  --text-dark: #F9FAFB;
+  --text-gray: #D1D5DB;
+  --text-light: #9CA3AF;
+  --border-light: rgba(255, 255, 255, 0.1);
+}
+
 * {
   margin: 0;
   padding: 0;

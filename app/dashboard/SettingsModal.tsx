@@ -9,15 +9,19 @@ interface SettingsModalProps {
     onClose: () => void;
     userName: string;
     onUpdateUser: (name: string) => void;
+    onUpdateUserImage: (url: string) => void;
 }
 
 type Tab = 'account' | 'appearance' | 'notifications' | 'security';
 
-export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser, onUpdateUserImage }: SettingsModalProps) {
     const [activeTab, setActiveTab] = useState<Tab>('account');
     const [isLoading, setIsLoading] = useState(false);
     const { showToast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Track initial theme to revert if user cancels
+    const [initialTheme, setInitialTheme] = useState<string | null>(null);
 
     // Form States
     const [formData, setFormData] = useState({
@@ -76,6 +80,11 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                     setAvatarPreview(data.avatarPath);
                 }
 
+                // Set initial theme for revert reference
+                if (initialTheme === null) {
+                    setInitialTheme(data.theme || 'light');
+                }
+
                 // Apply theme immediately on load to sync
                 applyTheme(data.theme || 'light');
             }
@@ -97,7 +106,29 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
             root.classList.add(theme);
         }
 
-        localStorage.setItem('theme', theme);
+        // Note: We do NOT define localStorage here for preview purposes. 
+        // We only save to localStorage on 'handleSave'. 
+        // But for consistency across reloads if the user refreshes, handleSave handles that.
+    };
+
+    // System theme listener
+    useEffect(() => {
+        if (formData.theme === 'system') {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleChange = () => {
+                applyTheme('system');
+            };
+            mediaQuery.addEventListener('change', handleChange);
+            return () => mediaQuery.removeEventListener('change', handleChange);
+        }
+    }, [formData.theme]);
+
+    const handleClose = () => {
+        // Revert theme if cancelled and we have an initial theme
+        if (initialTheme && initialTheme !== formData.theme) {
+            applyTheme(initialTheme);
+        }
+        onClose();
     };
 
     if (!isOpen) return null;
@@ -135,6 +166,16 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                 });
 
                 if (!resAvatar.ok) throw new Error('Error al subir avatar');
+
+                // Get the uploaded avatar path if the backend returns it, or use the object URL / temp assumption
+                // The backend likely returns { filepath: '/uploads/...' }
+                const dataAvatar = await resAvatar.json();
+                if (dataAvatar.filepath) {
+                    onUpdateUserImage(dataAvatar.filepath);
+                } else if (avatarPreview) {
+                    // Fallback if backend doesn't return path immediately but it succeeded
+                    onUpdateUserImage(avatarPreview);
+                }
             }
 
             // 2. Save Profile Settings
@@ -217,6 +258,10 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                 }
             }
 
+            // Commit settings (reset initial theme so we don't revert on close)
+            setInitialTheme(formData.theme);
+            localStorage.setItem('theme', formData.theme);
+
             onClose();
 
         } catch (error: any) {
@@ -236,10 +281,10 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[600px] flex overflow-hidden">
+            <div className="bg-white dark:bg-[#1A1D2E] rounded-2xl shadow-2xl w-full max-w-4xl h-[600px] flex overflow-hidden border dark:border-white/10">
 
                 {/* Sidebar */}
-                <div className="w-64 bg-gray-50 border-r border-gray-200 p-6 flex flex-col">
+                <div className="w-64 bg-gray-50 dark:bg-[#11131E] border-r border-gray-200 dark:border-white/10 p-6 flex flex-col">
                     <h2 className="text-xl font-bold text-gray-800 mb-8 flex items-center gap-2">
                         Configuración
                     </h2>
@@ -249,8 +294,8 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as Tab)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === tab.id
-                                    ? 'bg-white text-purple-600 shadow-sm border border-gray-100'
-                                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                    ? 'bg-white dark:bg-[#1A1D2E] text-purple-600 dark:text-purple-400 shadow-sm border border-gray-100 dark:border-white/10'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
                                     }`}
                             >
                                 <tab.icon size={18} />
@@ -263,13 +308,13 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                 {/* Content */}
                 <div className="flex-1 flex flex-col min-w-0">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                        <h3 className="text-lg font-bold text-gray-800">
+                    <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/10">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                             {tabs.find(t => t.id === activeTab)?.label}
                         </h3>
                         <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+                            onClick={handleClose}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full text-gray-500 dark:text-gray-400 transition-colors"
                         >
                             <FiX size={24} />
                         </button>
@@ -309,24 +354,24 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de Usuario</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de Usuario</label>
                                         <input
                                             type="text"
                                             value={formData.displayName}
                                             onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#11131E] text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo Electrónico</label>
                                         <input
                                             type="email"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             placeholder="correo@ejemplo.com"
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#11131E] text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                                         />
-                                        <p className="text-xs text-gray-500 mt-1">El email se usa para notificaciones y recuperación.</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">El email se usa para notificaciones y recuperación.</p>
                                     </div>
                                 </div>
                             </div>
@@ -344,10 +389,13 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                                         ].map(theme => (
                                             <button
                                                 key={theme.id}
-                                                onClick={() => setFormData({ ...formData, theme: theme.id })}
+                                                onClick={() => {
+                                                    setFormData({ ...formData, theme: theme.id });
+                                                    applyTheme(theme.id);
+                                                }}
                                                 className={`p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${formData.theme === theme.id
-                                                    ? 'border-purple-500 bg-purple-50 text-purple-700'
-                                                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400'
+                                                    : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 text-gray-600 dark:text-gray-400'
                                                     }`}
                                             >
                                                 <theme.icon size={24} />
@@ -357,11 +405,11 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                                     </div>
                                 </div>
                                 <div className="pt-6 border-t border-gray-100">
-                                    <h4 className="text-sm font-medium text-gray-900 mb-4">Idioma</h4>
+                                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-4">Idioma</h4>
                                     <select
                                         value={formData.language}
                                         onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                                        className="w-full max-w-xs px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                        className="w-full max-w-xs px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
                                     >
                                         <option value="es">Español (España)</option>
                                         <option value="en">English (US)</option>
@@ -373,16 +421,38 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
 
                         {activeTab === 'notifications' && (
                             <div className="space-y-6">
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#11131E] rounded-xl border border-gray-100 dark:border-white/10">
                                     <div>
-                                        <h4 className="font-medium text-gray-900">Notificaciones de Escritorio</h4>
-                                        <p className="text-sm text-gray-500">Recibe alertas cuando se completen importaciones.</p>
+                                        <h4 className="font-medium text-gray-900 dark:text-white">Notificaciones de Escritorio</h4>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">Recibe alertas cuando se completen importaciones.</p>
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input
                                             type="checkbox"
                                             checked={formData.notifications}
-                                            onChange={(e) => setFormData({ ...formData, notifications: e.target.checked })}
+                                            onChange={async (e) => {
+                                                const checked = e.target.checked;
+                                                setFormData({ ...formData, notifications: checked });
+
+                                                if (checked) {
+                                                    if (!('Notification' in window)) {
+                                                        showToast('Tu navegador no soporta notificaciones', 'error');
+                                                        return;
+                                                    }
+                                                    if (Notification.permission !== 'granted') {
+                                                        const permission = await Notification.requestPermission();
+                                                        if (permission !== 'granted') {
+                                                            showToast('Permiso de notificaciones denegado', 'error');
+                                                            setFormData(prev => ({ ...prev, notifications: false }));
+                                                        } else {
+                                                            new Notification('¡Notificaciones activadas!', {
+                                                                body: 'Ahora recibirás alertas importantes aquí.',
+                                                                icon: '/icon-192x192.png' // Adjust based on public assets if available
+                                                            });
+                                                        }
+                                                    }
+                                                }
+                                            }}
                                             className="sr-only peer"
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
@@ -395,28 +465,28 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                         {activeTab === 'security' && (
                             <div className="space-y-6 max-w-lg">
                                 <div>
-                                    <h4 className="font-medium text-gray-900 mb-4">Cambiar Contraseña</h4>
+                                    <h4 className="font-medium text-gray-900 dark:text-white mb-4">Cambiar Contraseña</h4>
                                     <div className="space-y-4">
                                         <input
                                             type="password"
                                             placeholder="Contraseña actual"
                                             value={passwordForm.currentPassword}
                                             onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
                                         />
                                         <input
                                             type="password"
                                             placeholder="Nueva contraseña"
                                             value={passwordForm.newPassword}
                                             onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
                                         />
                                         <input
                                             type="password"
                                             placeholder="Confirmar nueva contraseña"
                                             value={passwordForm.confirmPassword}
                                             onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
                                         />
                                     </div>
                                 </div>
@@ -425,10 +495,10 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser 
                     </div>
 
                     {/* Footer */}
-                    <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                    <div className="p-6 border-t border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-[#11131E] flex justify-end gap-3">
                         <button
-                            onClick={onClose}
-                            className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                            onClick={handleClose}
+                            className="px-6 py-2.5 bg-white dark:bg-[#1A1D2E] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                         >
                             Cancelar
                         </button>

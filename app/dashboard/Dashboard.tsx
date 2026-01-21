@@ -36,6 +36,7 @@ interface DashboardProps {
     userName: string;
     userImage?: string;
     onUpdateUser: (name: string) => void;
+    onUpdateUserImage: (url: string) => void;
 }
 
 interface PDF {
@@ -54,7 +55,7 @@ interface PDF {
     initialPage?: number;
 }
 
-export default function Dashboard({ userName, userImage, onUpdateUser }: DashboardProps) {
+export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateUserImage }: DashboardProps) {
     const [activeTab, setActiveTab] = useState('home');
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [pdfs, setPdfs] = useState<PDF[]>([]);
@@ -333,12 +334,13 @@ export default function Dashboard({ userName, userImage, onUpdateUser }: Dashboa
 
     return (
         <TTSProvider>
-            <div className="flex h-screen bg-gradient-to-br from-[#E8F0FF] via-[#B8D0FF] to-[#4F6FFF] overflow-hidden">
+            <div className="flex h-screen bg-gradient-to-br from-[#E8F0FF] via-[#B8D0FF] to-[#4F6FFF] dark:from-[#0F172A] dark:via-[#1E1B4B] dark:to-[#312E81] overflow-hidden">
                 <Sidebar
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                     isCollapsed={isSidebarCollapsed}
                     onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                    onOpenSettings={() => setShowSettingsModal(true)}
                 />
 
                 <div className="flex-1 flex flex-col overflow-hidden">
@@ -375,12 +377,12 @@ export default function Dashboard({ userName, userImage, onUpdateUser }: Dashboa
                                         </button>
                                     )}
                                     <div>
-                                        <h2 className="text-2xl font-bold text-gray-800">
+                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                                             {activeTab === 'favorites' ? 'Mis Favoritos' :
                                                 activeTab === 'folders' ? (selectedCategory || 'Carpetas') :
                                                     'Mis Libros'}
                                         </h2>
-                                        <p className="text-gray-600 mt-1">
+                                        <p className="text-gray-600 dark:text-gray-300 mt-1">
                                             {activeTab === 'favorites'
                                                 ? `Tus documentos destacados (${pdfs.filter(p => p.isFavorite).length})`
                                                 : activeTab === 'folders' && !selectedCategory
@@ -426,7 +428,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser }: Dashboa
                                                     }, {} as Record<string, number>)).map(([folderName, count]) => (
                                                         <div
                                                             key={folderName}
-                                                            className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/40 hover:border-[#4F6FFF]/30 hover:shadow-xl hover:shadow-[#4F6FFF]/10 transition-all group flex flex-col items-center justify-center text-center gap-4 animate-fade-in relative"
+                                                            className="bg-white/80 dark:bg-[#1A1D2E]/90 backdrop-blur-sm p-6 rounded-2xl border border-white/40 dark:border-white/10 hover:border-[#4F6FFF]/30 hover:shadow-xl hover:shadow-[#4F6FFF]/10 transition-all group flex flex-col items-center justify-center text-center gap-4 animate-fade-in relative"
                                                         >
                                                             <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                                                 <button
@@ -455,13 +457,13 @@ export default function Dashboard({ userName, userImage, onUpdateUser }: Dashboa
                                                                 onClick={() => setSelectedCategory(folderName)}
                                                                 className="w-full cursor-pointer"
                                                             >
-                                                                <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 transition-colors relative mx-auto">
+                                                                <div className="w-16 h-16 bg-purple-50 dark:bg-purple-500/20 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-500/30 transition-colors relative mx-auto">
                                                                     <FiFolder size={32} className="text-[#8B5CF6] fill-[#8B5CF6]/20" />
                                                                     <span className="absolute -top-1 -right-1 bg-[#8B5CF6] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                                                                         {count}
                                                                     </span>
                                                                 </div>
-                                                                <h4 className="font-semibold text-gray-800 mt-3 truncate">{folderName}</h4>
+                                                                <h4 className="font-semibold text-gray-800 dark:text-white mt-3 truncate">{folderName}</h4>
                                                                 <p className="text-xs text-gray-500">{count} archivo{count !== 1 ? 's' : ''}</p>
                                                             </div>
                                                             <button
@@ -627,6 +629,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser }: Dashboa
                     onClose={() => setShowSettingsModal(false)}
                     userName={userName}
                     onUpdateUser={onUpdateUser}
+                    onUpdateUserImage={onUpdateUserImage}
                 />
 
                 <MiniPlayer onRestore={(pdfId, page) => {

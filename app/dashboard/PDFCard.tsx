@@ -124,10 +124,10 @@ export default function PDFCard({
         <>
             <div
                 onClick={handleOpen}
-                className="group bg-white/90 backdrop-blur-sm rounded-2xl border border-white/40 hover:border-[#4F6FFF]/30 hover:shadow-xl hover:shadow-[#4F6FFF]/10 transition-all duration-300 animate-fade-in cursor-pointer relative"
+                className={`group bg-white/90 dark:bg-[#1A1D2E]/90 backdrop-blur-sm rounded-2xl border border-white/40 dark:border-white/10 hover:border-[#4F6FFF]/30 hover:shadow-xl hover:shadow-[#4F6FFF]/10 transition-all duration-300 animate-fade-in cursor-pointer relative ${isMenuOpen ? 'z-50' : 'z-auto'}`}
             >
                 {/* PDF Preview */}
-                <div className="aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center relative overflow-hidden">
+                <div className="aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
                     {coverImage ? (
                         <img
                             src={coverImage}
@@ -168,7 +168,7 @@ export default function PDFCard({
                 </button>
 
                 {/* Info */}
-                <div className="p-4 bg-white overflow-visible">
+                <div className="p-4 bg-white dark:bg-[#1A1D2E] overflow-visible">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                             {/* Barra de Progreso */}
@@ -187,7 +187,7 @@ export default function PDFCard({
                                 </div>
                             )}
 
-                            <h3 className="font-semibold text-gray-800 truncate group-hover:text-[#4F6FFF] transition-colors text-sm">
+                            <h3 className="font-semibold text-gray-800 dark:text-gray-100 truncate group-hover:text-[#4F6FFF] transition-colors text-sm">
                                 {title}
                             </h3>
                             {folderName && (
@@ -205,12 +205,12 @@ export default function PDFCard({
                                     e.stopPropagation();
                                     setIsMenuOpen(!isMenuOpen);
                                 }}
-                                className="p-1.5 text-gray-400 hover:text-[#4F6FFF] hover:bg-gray-100 rounded-lg transition-all"
+                                className="p-1.5 text-gray-400 hover:text-[#4F6FFF] hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all"
                             >
                                 <FiMoreVertical size={16} />
                             </button>
                             {isMenuOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1A1D2E] rounded-lg shadow-xl border border-gray-200 dark:border-white/10 py-1 z-50">
                                     {/* Download Offline Button */}
                                     <button
                                         onClick={(e) => {
@@ -219,7 +219,7 @@ export default function PDFCard({
                                             setIsMenuOpen(false);
                                         }}
                                         disabled={isDownloaded || isDownloading}
-                                        className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors ${isDownloaded ? 'text-green-600 font-medium' : 'text-gray-700 hover:bg-gray-100'
+                                        className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors ${isDownloaded ? 'text-green-600 dark:text-green-400 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
                                             }`}
                                     >
                                         {isDownloading ? (
@@ -232,7 +232,7 @@ export default function PDFCard({
                                         {isDownloaded ? 'Descargado' : isDownloading ? 'Bajando...' : 'Descargar Offline'}
                                     </button>
 
-                                    <hr className="my-1 border-gray-200" />
+                                    <hr className="my-1 border-gray-200 dark:border-white/10" />
 
                                     <button
                                         onClick={(e) => {
@@ -240,7 +240,7 @@ export default function PDFCard({
                                             if (onViewDetails) onViewDetails();
                                             setIsMenuOpen(false);
                                         }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                                     >
                                         <FiEye size={16} />
                                         Ver detalles
@@ -252,7 +252,7 @@ export default function PDFCard({
                                             setShowAnnotationsModal(true);
                                             setIsMenuOpen(false);
                                         }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                                     >
                                         <FiFileText size={16} />
                                         Ver anotaciones
@@ -264,13 +264,13 @@ export default function PDFCard({
                                             setShowEditModal(true);
                                             setIsMenuOpen(false);
                                         }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                                     >
                                         <FiEdit size={16} />
                                         Editar
                                     </button>
 
-                                    <hr className="my-1 border-gray-200" />
+                                    <hr className="my-1 border-gray-200 dark:border-white/10" />
 
                                     <button
                                         onClick={(e) => {
@@ -280,7 +280,7 @@ export default function PDFCard({
                                             }
                                             setIsMenuOpen(false);
                                         }}
-                                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
                                     >
                                         <FiTrash2 size={16} />
                                         Eliminar
