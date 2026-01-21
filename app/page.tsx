@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import AuthModal from './components/AuthModal';
+import LandingPage from './LandingPage';
 import Dashboard from './dashboard/Dashboard';
 import { useRouter } from 'next/navigation';
+import { getToken, getUser } from './lib/auth-utils';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState('');
   const [userImage, setUserImage] = useState('');
@@ -15,19 +17,14 @@ export default function Home() {
 
   useEffect(() => {
     // Verificar si existe un token
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = getToken();
+    const user = getUser();
 
     if (token) {
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          // Prioritize username, then try to fallback to name or email
-          const displayName = user.username || user.name || user.email?.split('@')[0] || 'Usuario';
-          setUserName(displayName);
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-        }
+      if (user) {
+        // Prioritize username, then try to fallback to name or email
+        const displayName = user.username || user.name || user.email?.split('@')[0] || 'Usuario';
+        setUserName(displayName);
       }
 
       // Fetch fresh profile data
@@ -80,7 +77,8 @@ export default function Home() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E8F0FF] via-[#B8D0FF] to-[#4F6FFF] flex items-center justify-center">
+      <div className="relative">
+        <LandingPage onLoginClick={() => setShowAuthModal(true)} />
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}

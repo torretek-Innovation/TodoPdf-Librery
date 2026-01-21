@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiEdit2 } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
+import { getToken } from '../lib/auth-utils';
 
 interface RenameFolderModalProps {
     isOpen: boolean;
@@ -41,7 +42,7 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 },
                 body: JSON.stringify({ newName: newName.trim() })
             });

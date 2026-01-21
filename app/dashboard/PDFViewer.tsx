@@ -7,6 +7,7 @@ import {
     FiExternalLink, FiType, FiEdit3, FiPenTool, FiTrash2, FiFileText,
     FiVolume2, FiSquare
 } from 'react-icons/fi';
+import { getToken } from '../lib/auth-utils';
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -113,7 +114,9 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
     const loadAnnotations = async () => {
         if (!pdfId) return;
         try {
-            const res = await fetch(`/api/pdfs/${pdfId}/annotations`);
+            const res = await fetch(`/api/pdfs/${pdfId}/annotations`, {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 // Merge with existing local state if needed, or mostly replace
@@ -140,7 +143,10 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
                 console.log(`💾 Guardando anotaciones de la página ${page}...`);
                 const response = await fetch(`/api/pdfs/${pdfId}/annotations`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
                     body: JSON.stringify({
                         page,
                         annotations: currentAnns
@@ -329,7 +335,10 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
             try {
                 await fetch(`/api/pdfs/${pdfId}/progress`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
                     body: JSON.stringify({ page: pageNumber, totalPages: numPages })
                 });
             } catch (error) {
@@ -426,7 +435,9 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
 
             const loadLastPosition = async () => {
                 try {
-                    const response = await fetch(`/api/pdfs/${pdfId}`);
+                    const response = await fetch(`/api/pdfs/${pdfId}`, {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    });
                     if (response.ok) {
                         const data = await response.json();
                         // Ahora 'data.currentPage' existe y es un número válido enviado por nuestra API modificada
@@ -570,7 +581,7 @@ export default function PDFViewer({ isOpen, onClose, pdfUrl, title, pdfId, initi
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-sm">
             {/* Overlay de fondo */}
             <div className="absolute inset-0" onClick={onClose} />
 

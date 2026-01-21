@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { PrismaClient } from '@prisma/client';
+import { getUserFromRequest } from '@/lib/auth';
 import path from 'path';
 
 const prisma = new PrismaClient();
@@ -58,14 +59,17 @@ export async function POST(request: NextRequest) {
 
         await writeFile(filePath, buffer);
 
-        // TODO: Obtener el userId del token
-        // Por ahora, obtener el primer usuario
-        const user = await prisma.user.findFirst();
+        const userId = getUserFromRequest(request);
+        if (!userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const user = await prisma.user.findUnique({ where: { id: userId } });
 
         if (!user) {
             return NextResponse.json({
-                error: 'No user found. Please create a user first.'
-            }, { status: 400 });
+                error: 'User not found.'
+            }, { status: 404 });
         }
 
         // Guardar en la base de datos

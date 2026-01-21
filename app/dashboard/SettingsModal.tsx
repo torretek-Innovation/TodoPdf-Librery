@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiX, FiUser, FiMonitor, FiBell, FiShield, FiSave, FiMoon, FiSun, FiSmartphone } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
+import { getToken, getUser, updateUser } from '../lib/auth-utils';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -51,7 +52,7 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
 
     const fetchUserProfile = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = getToken();
             const res = await fetch('/api/user/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -151,7 +152,7 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
 
     const handleSave = async () => {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = getToken();
 
         try {
             // 1. Upload Avatar if changed
@@ -203,14 +204,13 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
                 const updatedUser = await resProfile.json();
 
                 // Update local storage to reflect changes immediately
-                const storedUser = localStorage.getItem('user');
+                const storedUser = getUser();
                 if (storedUser) {
-                    const parsedUser = JSON.parse(storedUser);
-                    localStorage.setItem('user', JSON.stringify({
-                        ...parsedUser,
+                    updateUser({
+                        ...storedUser,
                         username: formData.displayName,
                         email: formData.email
-                    }));
+                    });
                 }
 
                 // Apply theme immediately

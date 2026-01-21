@@ -6,6 +6,7 @@ import { FiSearch, FiBell, FiUser, FiLogOut, FiUpload, FiFolder, FiCheckCircle, 
 import { AnimatePresence, motion } from 'framer-motion';
 import NotificationsDropdown, { Notification } from './NotificationsDropdown';
 import { useToast } from '../providers/ToastProvider';
+import { getToken, removeToken } from '../lib/auth-utils';
 
 interface HeaderProps {
     userName: string;
@@ -236,7 +237,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
             const response = await fetch('/api/pdfs/upload', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 },
                 body: formData
             });
@@ -281,7 +282,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
     */
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        removeToken();
 
         setShowUserMenu(false);
 

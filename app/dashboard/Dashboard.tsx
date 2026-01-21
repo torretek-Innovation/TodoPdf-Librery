@@ -18,6 +18,7 @@ import PDFFilterNav from './PDFFilterNav';
 import { useToast } from '../providers/ToastProvider';
 import { TTSProvider } from '../context/TTSContext';
 import MiniPlayer from './MiniPlayer';
+import { getToken } from '../lib/auth-utils';
 
 // Importar PDFViewer solo en el cliente para evitar errores de SSR
 const PDFViewer = dynamic(() => import('./PDFViewer'), {
@@ -87,7 +88,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
             const response = await fetch(`/api/pdfs/${pdfId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Authorization': `Bearer ${getToken()}`
                 },
             });
 
@@ -121,7 +122,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
         try {
             const response = await fetch('/api/pdfs', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 }
             });
 
@@ -148,7 +149,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
         fetch('/api/cron/sync', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${getToken()}`
             }
         }).catch(err => console.log('Sync skipped or failed:', err));
 
@@ -171,7 +172,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 },
                 body: JSON.stringify(updatedData)
             });
@@ -260,7 +261,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
             const res = await fetch(`/api/folders/${encodeURIComponent(folderName)}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 }
             });
 

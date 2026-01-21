@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { useToast } from '../providers/ToastProvider';
 import CreateJSONModal from './CreateJSONModal';
 import PDFFilterNav from './PDFFilterNav';
+import { getToken } from '../lib/auth-utils';
 
 const PDFViewer = dynamic(() => import('./PDFViewer'), { ssr: false });
 
@@ -102,7 +103,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
 
     const loadSavedLibraries = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = getToken();
             if (!token) {
                 setSavedLibraries([]);
                 return;
@@ -187,7 +188,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
 
     const saveLibrary = async (name: string, url: string, content: any) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = getToken();
             const res = await fetch('/api/external-libraries', {
                 method: 'POST',
                 headers: {
@@ -228,7 +229,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
             setData(jsonData);
 
             // Save to database
-            const token = localStorage.getItem('token');
+            const token = getToken();
             await fetch('/api/external-libraries', {
                 method: 'POST',
                 headers: {
@@ -257,7 +258,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
         if (!confirm('¿Eliminar esta biblioteca?')) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = getToken();
             await fetch(`/api/external-libraries/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -277,7 +278,7 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
     const handleImportToLibrary = async (pdf: ExplorePDF) => {
         setImportingIds(prev => new Set(Array.from(prev).concat(pdf.id)));
         try {
-            const token = localStorage.getItem('token');
+            const token = getToken();
             const res = await fetch('/api/external-libraries/import-pdf', {
                 method: 'POST',
                 headers: {

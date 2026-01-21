@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { FiX, FiFolder, FiCheck } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
+import { getToken } from '../lib/auth-utils';
 
 interface PDF {
     id: string;
@@ -43,7 +44,7 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 },
                 body: JSON.stringify({
                     pdfIds: selectedPdfs,

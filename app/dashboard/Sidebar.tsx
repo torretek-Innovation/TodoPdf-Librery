@@ -28,14 +28,21 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle,
             <div className={`mb-8 flex ${isCollapsed ? 'justify-center' : 'px-6'}`}>
                 <button
                     onClick={onToggle}
-                    className="w-12 h-12 bg-gradient-to-br from-[#4F6FFF] to-[#8B5CF6] rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+                    className="w-12 h-12 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl border border-gray-100 dark:border-white/5 transition-all overflow-hidden p-2 group"
                 >
-                    <FiMenu size={24} className="text-white" />
+                    <img
+                        src="/logo/only_logo.png"
+                        alt="Logo"
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                    />
                 </button>
                 {!isCollapsed && (
                     <div className="ml-3 flex flex-col justify-center animate-fade-in-left">
-                        <span className="font-bold text-gray-800 dark:text-white text-lg leading-tight">TodoPDF</span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Gestor Inteligente</span>
+                        <img
+                            src="/logo/only_letters.png"
+                            alt="TorreTek Logo"
+                            className="h-10 object-contain"
+                        />
                     </div>
                 )}
             </div>

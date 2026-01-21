@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FiTrash2, FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
 import PDFCard from './PDFCard';
 import { useToast } from '../providers/ToastProvider';
+import { getToken } from '../lib/auth-utils';
 
 interface PDF {
     id: string;
@@ -34,7 +35,7 @@ export default function TrashView({ onRestore }: TrashViewProps) {
         try {
             const response = await fetch('/api/pdfs/trash', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 }
             });
 
@@ -59,7 +60,7 @@ export default function TrashView({ onRestore }: TrashViewProps) {
             const response = await fetch(`/api/pdfs/${pdfId}/restore`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 }
             });
 
@@ -84,7 +85,7 @@ export default function TrashView({ onRestore }: TrashViewProps) {
             const response = await fetch(`/api/pdfs/${pdfId}?permanent=true`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${getToken()}`
                 }
             });
 
@@ -111,7 +112,7 @@ export default function TrashView({ onRestore }: TrashViewProps) {
                 fetch(`/api/pdfs/${pdf.id}?permanent=true`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${getToken()}`
                     }
                 })
             );

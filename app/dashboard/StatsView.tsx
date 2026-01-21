@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FiActivity, FiBook, FiBookOpen, FiClock, FiTrendingUp, FiAward } from 'react-icons/fi';
+import { getToken } from '../lib/auth-utils';
 
 interface PDF {
     id: string;
@@ -36,7 +37,7 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
             try {
                 const response = await fetch('/api/user/reading-streak', {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${getToken()}`
                     }
                 });
                 if (response.ok) {
