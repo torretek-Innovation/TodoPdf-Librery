@@ -52,3 +52,6 @@ next-env.d.ts
 # avatars
 /public/uploads/avatars
 
+# releases
+/release
+

@@ -39,8 +39,13 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                     <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
                         <div className="lg:col-span-6 text-center lg:text-left mb-12 lg:mb-0">
-                            <div className="inline-block px-4 py-1.5 mb-6 bg-purple-50 text-purple-600 rounded-full text-sm font-semibold tracking-wide border border-purple-100 animate-fade-in-up">
-                                ✨ Gestor de Archivos PDFS
+                            <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <div className="inline-block px-4 py-1.5 bg-purple-50 text-purple-600 rounded-full text-sm font-semibold tracking-wide border border-purple-100 animate-fade-in-up">
+                                    GESTOR DE ARCHIVOS PDF
+                                </div>
+                                <div className="inline-block px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-sm font-semibold tracking-wide border border-green-100 animate-fade-in-up">
+                                    VERSIÓN 1.0.0
+                                </div>
                             </div>
                             <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
                                 TodoPDF <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">Library</span>
@@ -266,7 +271,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
             {/* Footer */}
             <footer className="bg-gray-50 py-12 border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-                    <p>© {new Date().getFullYear()} TodoPDF. Desarrollado por <span className="font-bold text-gray-700">TorreTek</span>.</p>
+                    <p>© {new Date().getFullYear()} TodoPDF v1.0.0. Desarrollado por <span className="font-bold text-gray-700">TorreTek</span>.</p>
                 </div>
             </footer>
         </div>

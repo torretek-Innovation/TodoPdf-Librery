@@ -89,7 +89,7 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
             {/* Bienvenida */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                    Hola, <span className="text-[#4F6FFF] dark:text-[#6366F1]">{userName.includes('@') ? userName.split('@')[0] : userName}</span> 👋
+                    Hola, <span className="text-[#4F6FFF] dark:text-[#6366F1]">{userName.includes('@') ? userName.split('@')[0] : userName}</span>
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 mt-2">Aquí tienes un resumen de tu actividad de lectura.</p>
             </div>
@@ -174,8 +174,8 @@ export default function StatsView({ pdfs, userName }: StatsViewProps) {
                             </div>
                         ) : (
                             <>
-                                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full flex items-center justify-center mb-4 text-3xl mx-auto shadow-lg">
-                                    {readingStreak.currentStreak > 0 ? '🔥' : '📚'}
+                                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full flex items-center justify-center mb-4 mx-auto shadow-lg">
+                                    <FiAward size={40} />
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Racha de Lectura</h3>
 

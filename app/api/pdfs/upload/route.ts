@@ -49,15 +49,19 @@ export async function POST(request: NextRequest) {
 
 
 
-        // Crear la carpeta si no existe
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
-        await mkdir(uploadDir, { recursive: true });
+        // Obtener directorio persistente
+        const { ensureStorageDirectory, getFileUrl } = await import('@/lib/storage-utils');
+        const uploadDir = await ensureStorageDirectory('pdfs');
 
         const safeFileName = path.basename(file.name);
         const fileName = `${Date.now()}-${safeFileName}`;
         const filePath = path.join(uploadDir, fileName);
 
         await writeFile(filePath, buffer);
+
+        // Generar URL pública (para guardar en la BD)
+        // Guardamos el path relativo o absoluto de la URL que el frontend usará
+        const dbFilePath = getFileUrl(fileName, 'pdfs');
 
         const userId = getUserFromRequest(request);
         if (!userId) {
@@ -79,7 +83,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     userId: user.id,
                     title: title || file.name.replace('.pdf', ''),
-                    filePath: `/uploads/pdfs/${fileName}`,
+                    filePath: dbFilePath,
                     totalPages: totalPages,
                     size: file.size,
                     folderName: folderName,
@@ -97,7 +101,7 @@ export async function POST(request: NextRequest) {
                     data: {
                         userId: user.id,
                         title: title || file.name.replace('.pdf', ''),
-                        filePath: `/uploads/pdfs/${fileName}`,
+                        filePath: dbFilePath,
                         totalPages: totalPages,
                         size: file.size,
                         // folderName omitted fallback

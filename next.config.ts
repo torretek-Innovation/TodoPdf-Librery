@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   webpack: (config, { isServer }) => {
     // Configuración para react-pdf
     config.resolve.alias.canvas = false;

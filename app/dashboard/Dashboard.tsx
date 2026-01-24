@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { FiFolder, FiArrowLeft, FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiFolder, FiArrowLeft, FiPlus, FiEdit2, FiTrash2, FiFile } from 'react-icons/fi';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import PDFCard from './PDFCard';
@@ -513,7 +513,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
 
                                                             {filteredPDFs.length === 0 ? (
                                                                 <div className="text-center py-20">
-                                                                    <div className="text-6xl mb-4">📄</div>
+                                                                    <FiFile size={64} className="mb-4 text-gray-300 mx-auto" />
                                                                     <h3 className="text-xl font-semibold text-gray-700 mb-2">
                                                                         No se encontraron documentos
                                                                     </h3>

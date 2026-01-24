@@ -184,7 +184,7 @@ export default function AnnotationsModal({ isOpen, onClose, pdfId, pdfTitle, onN
                         </div>
                     ) : filteredAnnotations.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                            <div className="text-6xl mb-4">📝</div>
+                            <FiEdit3 size={64} className="mb-4 text-gray-300 mx-auto" />
                             <h3 className="text-lg font-semibold mb-2">No hay anotaciones</h3>
                             <p className="text-sm">
                                 {filter === 'all'

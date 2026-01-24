@@ -3,11 +3,10 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         // Ensure params are awaited if they are promises (Next.js 15+) or just access them
-        const resolvedParams = await Promise.resolve(params);
-        const { id } = resolvedParams;
+        const { id } = await params;
         const pdfId = parseInt(id);
 
         console.log(`Toggling favorite for PDF ID: ${id} parsed as ${pdfId}`);

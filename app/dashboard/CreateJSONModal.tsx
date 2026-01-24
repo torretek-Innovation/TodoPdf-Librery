@@ -152,32 +152,31 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                 <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h2 className="text-2xl font-bold mb-2">✨ Crear Diccionario de PDFs</h2>
+                            <h2 className="text-2xl font-bold mb-2">Crear Diccionario de PDFs</h2>
                             <p className="text-purple-100 text-sm">Crea tu propio índice JSON para compartir con otros</p>
                         </div>
-                        <p className="text-purple-100 text-sm">Crea tu propio índice JSON para compartir con otros</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept=".json"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                        />
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="p-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
-                            title="Importar JSON existente"
-                        >
-                            <FiUpload size={18} /> <span className="hidden sm:inline">Importar JSON</span>
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
-                        >
-                            <FiX size={24} />
-                        </button>
+                        <div className="flex gap-2">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".json"
+                                onChange={handleFileUpload}
+                                className="hidden"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+                                title="Importar JSON existente"
+                            >
+                                <FiUpload size={18} /> <span className="hidden sm:inline">Importar JSON</span>
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
+                            >
+                                <FiX size={24} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -287,7 +286,7 @@ export default function CreateJSONModal({ onClose }: { onClose: () => void }) {
                     <div className="bg-white dark:bg-white/5 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-5">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                                📚 PDFs <span className="text-sm font-normal text-gray-500">({pdfs.length})</span>
+                                PDFs <span className="text-sm font-normal text-gray-500">({pdfs.length})</span>
                             </h3>
                             <button
                                 onClick={addPDF}

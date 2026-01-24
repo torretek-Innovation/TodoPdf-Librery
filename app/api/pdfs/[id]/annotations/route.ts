@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma";
 // GET /api/pdfs/[id]/annotations
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     // Await params if necessary (Next.js 15+ needs this, doing it for safety)
-    const { id } = await Promise.resolve(params);
+    const { id } = await params;
     const pdfId = parseInt(id);
 
     if (isNaN(pdfId)) {
@@ -81,9 +81,9 @@ export async function GET(
 // For simplicity and robustness, we will accept a "Page Update" payload.
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await Promise.resolve(params);
+    const { id } = await params;
     const pdfId = parseInt(id);
     const body = await request.json();
     const { page, annotations } = body;
