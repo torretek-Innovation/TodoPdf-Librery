@@ -1,6 +1,6 @@
 {
   "name": "todo-pdf",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "main": "electron/main.js",
   "author": "TorreTek",
@@ -35,11 +35,15 @@
           "**/*",
           "node_modules/**/*"
         ]
+      },
+      {
+        "from": "prisma/template.db",
+        "to": "database/template.db"
       }
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/logo/logo_with_letter.png"
+      "icon": "public/logo/only_logo.png"
     },
     "nsis": {
       "oneClick": false,
