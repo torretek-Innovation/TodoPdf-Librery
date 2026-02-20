@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useState, useEffect, useRef } from 'react';
 import { FiX, FiUser, FiMonitor, FiBell, FiShield, FiSave, FiMoon, FiSun, FiSmartphone } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
@@ -16,6 +17,7 @@ interface SettingsModalProps {
 type Tab = 'account' | 'appearance' | 'notifications' | 'security';
 
 export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser, onUpdateUserImage }: SettingsModalProps) {
+
     const [activeTab, setActiveTab] = useState<Tab>('account');
     const [isLoading, setIsLoading] = useState(false);
     const { showToast } = useToast();
@@ -78,7 +80,7 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
                     driveWatchUrl: data.driveWatchUrl || ''
                 });
                 if (data.avatarPath) {
-                    setAvatarPreview(data.avatarPath);
+                    setAvatarPreview(`${data.avatarPath}?t=${new Date().getTime()}`);
                 }
 
                 // Set initial theme for revert reference
@@ -172,7 +174,7 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
                 // The backend likely returns { filepath: '/uploads/...' }
                 const dataAvatar = await resAvatar.json();
                 if (dataAvatar.filepath) {
-                    onUpdateUserImage(dataAvatar.filepath);
+                    onUpdateUserImage(`${dataAvatar.filepath}?t=${new Date().getTime()}`);
                 } else if (avatarPreview) {
                     // Fallback if backend doesn't return path immediately but it succeeded
                     onUpdateUserImage(avatarPreview);
@@ -367,11 +369,11 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
                                         <input
                                             type="email"
                                             value={formData.email}
+                                            disabled
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             placeholder="correo@ejemplo.com"
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#11131E] text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-[#0a0c14] text-gray-500 dark:text-gray-400 cursor-not-allowed outline-none transition-all"
                                         />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">El email se usa para notificaciones y recuperación.</p>
                                     </div>
                                 </div>
                             </div>
@@ -404,18 +406,7 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
                                         ))}
                                     </div>
                                 </div>
-                                <div className="pt-6 border-t border-gray-100">
-                                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-4">Idioma</h4>
-                                    <select
-                                        value={formData.language}
-                                        onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                                        className="w-full max-w-xs px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
-                                    >
-                                        <option value="es">Español (España)</option>
-                                        <option value="en">English (US)</option>
-                                        <option value="fr">Français</option>
-                                    </select>
-                                </div>
+
                             </div>
                         )}
 
