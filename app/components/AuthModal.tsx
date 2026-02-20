@@ -7,7 +7,7 @@ import { setToken, setUser } from '../lib/auth-utils';
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onLogin: (email: string, password: string) => void;
+    onLogin: (email: string, password: string, userData?: any) => void;
 }
 
 // Preguntas de seguridad predefinidas
@@ -92,7 +92,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
 
             setToken(data.token, rememberMe);
             setUser(data.user, rememberMe);
-            onLogin(data.user.username || email, password);
+            onLogin(data.user.username || email, password, data.user);
         } catch (error) {
             console.error('Error:', error);
             setErrorMsg('Error al conectar con el servidor');
@@ -153,7 +153,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
 
             setToken(data.token, true);
             setUser(data.user, true);
-            onLogin(data.user.username || email, password);
+            onLogin(data.user.username || email, password, data.user);
         } catch (error) {
             console.error('Error:', error);
             setErrorMsg('Error al conectar con el servidor');
@@ -403,7 +403,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="text"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="correo@ejemplo.com"
                                             required
                                         />
@@ -418,7 +418,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="••••••••"
                                             required
                                         />
@@ -470,7 +470,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Juan Pérez"
                                             required
                                         />
@@ -485,7 +485,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="correo@ejemplo.com"
                                             required
                                         />
@@ -500,7 +500,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Mínimo 6 caracteres"
                                             required
                                         />
@@ -527,7 +527,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                     <select
                                         value={selectedQuestion}
                                         onChange={(e) => setSelectedQuestion(e.target.value)}
-                                        className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-700 appearance-none cursor-pointer"
+                                        className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 appearance-none cursor-pointer"
                                         required
                                     >
                                         <option value="">-- Elige una pregunta --</option>
@@ -545,7 +545,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="text"
                                             value={securityAnswer}
                                             onChange={(e) => setSecurityAnswer(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Escribe tu respuesta..."
                                             required
                                         />
@@ -581,7 +581,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="text"
                                             value={recoverUsername}
                                             onChange={(e) => setRecoverUsername(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Tu usuario o correo electrónico"
                                             required
                                         />
@@ -619,7 +619,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="text"
                                             value={recoverAnswer}
                                             onChange={(e) => setRecoverAnswer(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Escribe tu respuesta..."
                                             autoFocus
                                             required
@@ -653,7 +653,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="password"
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Mínimo 6 caracteres"
                                             required
                                         />
@@ -668,7 +668,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="password"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
                                             placeholder="Repite la contraseña"
                                             required
                                         />

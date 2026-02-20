@@ -22,6 +22,10 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
     const [imageError, setImageError] = useState(false);
     const { showToast, notifications, markAsRead, clearNotifications, unreadCount } = useToast();
 
+    useEffect(() => {
+        setImageError(false);
+    }, [userImage]);
+
     // Search State
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);

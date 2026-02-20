@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
                     username: user.username,
                     email: user.email,
                     createdAt: user.createdAt,
+                    avatarPath: user.avatarPath,
                 },
                 token,
             },

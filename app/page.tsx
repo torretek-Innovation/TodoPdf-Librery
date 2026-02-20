@@ -41,7 +41,7 @@ export default function Home() {
           if (data.username) setUserName(data.username);
           // Use the avatar path from API if available
           if (data.avatarPath) {
-            setUserImage(data.avatarPath);
+            setUserImage(`${data.avatarPath}?t=${new Date().getTime()}`);
           } else {
             // Fallback to default
             setUserImage('/uploads/avatars/user.png');
@@ -67,10 +67,18 @@ export default function Home() {
     </div>;
   }
 
-  const handleLogin = (email: string, password: string) => {
-    setUserName(email.split('@')[0]);
-    // Set default on login
-    setUserImage('/uploads/avatars/user.png');
+  const handleLogin = (email: string, password: string, userData?: any) => {
+    if (userData) {
+      setUserName(userData.username || email.split('@')[0]);
+      if (userData.avatarPath) {
+        setUserImage(`${userData.avatarPath}?t=${new Date().getTime()}`);
+      } else {
+        setUserImage('/uploads/avatars/user.png');
+      }
+    } else {
+      setUserName(email.split('@')[0]);
+      setUserImage('/uploads/avatars/user.png');
+    }
     setIsAuthenticated(true);
     setShowAuthModal(false);
   };
