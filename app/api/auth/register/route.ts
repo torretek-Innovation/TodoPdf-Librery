@@ -5,7 +5,7 @@ import { hashPassword, generateToken } from '@/lib/auth';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { username, email, password } = body;
+        const { username, email, password, securityQuestion, securityAnswer } = body;
 
         // Validaciones
         if (!username || !password || !email) {
@@ -18,6 +18,13 @@ export async function POST(request: NextRequest) {
         if (password.length < 6) {
             return NextResponse.json(
                 { error: 'La contraseña debe tener al menos 6 caracteres' },
+                { status: 400 }
+            );
+        }
+
+        if (!securityQuestion || !securityAnswer) {
+            return NextResponse.json(
+                { error: 'La pregunta y respuesta de seguridad son requeridas' },
                 { status: 400 }
             );
         }
@@ -42,12 +49,22 @@ export async function POST(request: NextRequest) {
         // Hash de la contraseña
         const passwordHash = await hashPassword(password);
 
-        // Crear usuario
+        // Hash de la respuesta de seguridad (normalizada a minúsculas y sin espacios extra)
+        const normalizedAnswer = securityAnswer.trim().toLowerCase();
+        const answerHash = await hashPassword(normalizedAnswer);
+
+        // Crear usuario con pregunta de seguridad
         const user = await prisma.user.create({
             data: {
                 username,
                 email,
                 passwordHash,
+                securityQuestion: {
+                    create: {
+                        question: securityQuestion,
+                        answerHash: answerHash,
+                    }
+                }
             },
         });
 
