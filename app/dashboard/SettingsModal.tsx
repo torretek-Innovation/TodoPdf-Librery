@@ -2,7 +2,7 @@
 
 
 import { useState, useEffect, useRef } from 'react';
-import { FiX, FiUser, FiMonitor, FiBell, FiShield, FiSave, FiMoon, FiSun, FiSmartphone } from 'react-icons/fi';
+import { FiX, FiUser, FiMonitor, FiBell, FiShield, FiSave, FiMoon, FiSun, FiSmartphone, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useToast } from '../providers/ToastProvider';
 import { getToken, getUser, updateUser } from '../lib/auth-utils';
 
@@ -44,6 +44,11 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
         newPassword: '',
         confirmPassword: ''
     });
+
+    // Visibilidad de contraseñas
+    const [showCurrentPass, setShowCurrentPass] = useState(false);
+    const [showNewPass, setShowNewPass] = useState(false);
+    const [showConfirmPass, setShowConfirmPass] = useState(false);
 
     // Load initial data
     useEffect(() => {
@@ -458,27 +463,56 @@ export default function SettingsModal({ isOpen, onClose, userName, onUpdateUser,
                                 <div>
                                     <h4 className="font-medium text-gray-900 dark:text-white mb-4">Cambiar Contraseña</h4>
                                     <div className="space-y-4">
-                                        <input
-                                            type="password"
-                                            placeholder="Contraseña actual"
-                                            value={passwordForm.currentPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="Nueva contraseña"
-                                            value={passwordForm.newPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="Confirmar nueva contraseña"
-                                            value={passwordForm.confirmPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
-                                        />
+                                        <div className="relative group">
+                                            <input
+                                                type={showCurrentPass ? "text" : "password"}
+                                                placeholder="Contraseña actual"
+                                                value={passwordForm.currentPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                                                className="w-full px-4 pr-12 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCurrentPass(!showCurrentPass)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors"
+                                            >
+                                                {showCurrentPass ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                            </button>
+                                        </div>
+
+                                        <div className="relative group">
+                                            <input
+                                                type={showNewPass ? "text" : "password"}
+                                                placeholder="Nueva contraseña"
+                                                value={passwordForm.newPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                                className="w-full px-4 pr-12 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowNewPass(!showNewPass)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors"
+                                            >
+                                                {showNewPass ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                            </button>
+                                        </div>
+
+                                        <div className="relative group">
+                                            <input
+                                                type={showConfirmPass ? "text" : "password"}
+                                                placeholder="Confirmar nueva contraseña"
+                                                value={passwordForm.confirmPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                                                className="w-full px-4 pr-12 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white dark:bg-[#11131E] text-gray-800 dark:text-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPass(!showConfirmPass)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors"
+                                            >
+                                                {showConfirmPass ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

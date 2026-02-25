@@ -22,11 +22,9 @@ export async function POST(req: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Ensure directory exists
-        const uploadDir = join(process.cwd(), 'public', 'uploads', 'avatars');
-        if (!existsSync(uploadDir)) {
-            mkdirSync(uploadDir, { recursive: true });
-        }
+        // Usar utilidades de almacenamiento centralizadas
+        const { ensureStorageDirectory, getFileUrl } = await import('@/lib/storage-utils');
+        const uploadDir = await ensureStorageDirectory('avatars');
 
         // Generate unique filename
         const ext = file.name.split('.').pop() || 'png';
@@ -35,7 +33,8 @@ export async function POST(req: NextRequest) {
 
         await writeFile(filePath, buffer);
 
-        const avatarPath = `/uploads/avatars/${filename}`;
+        // Obtener la URL correcta según el entorno (Dev/Prod)
+        const avatarPath = getFileUrl(filename, 'avatars');
 
         await prisma.user.update({
             where: { id: userId },

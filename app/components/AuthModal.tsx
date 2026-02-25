@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FiX, FiMail, FiLock, FiUser, FiShield, FiArrowLeft, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiX, FiMail, FiLock, FiUser, FiShield, FiArrowLeft, FiCheckCircle, FiAlertCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 import { setToken, setUser } from '../lib/auth-utils';
 
 interface AuthModalProps {
@@ -47,6 +47,11 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
+    // Visibilidad de contraseñas
+    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     if (!isOpen) return null;
 
     const resetForm = () => {
@@ -61,6 +66,9 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
         setRecoverUserId(null);
         setNewPassword('');
         setConfirmPassword('');
+        setShowPassword(false);
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
         setErrorMsg('');
         setIsLoading(false);
     };
@@ -340,7 +348,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
             <div className="absolute w-[520px] h-[520px] bg-[#4F6FFF]/30 blur-[120px] rounded-full" />
 
             <div className="relative w-full max-w-md mx-4 transform transition-all hover:scale-[1.01] duration-500">
-                <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(79,111,255,0.6)] overflow-hidden border border-white/60 relative z-10">
+                <div className="bg-white/90 dark:bg-[#1A1D2E]/95 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(79,111,255,0.6)] overflow-hidden border border-white/60 dark:border-white/10 relative z-10">
 
                     {/* Decorative Elements on Card */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/20 to-transparent rounded-bl-[2.5rem] -z-10"></div>
@@ -396,14 +404,14 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                         {view === 'login' && (
                             <form onSubmit={handleLogin} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Correo o usuario</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Correo o usuario</label>
                                     <div className="relative group">
                                         <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
                                             type="text"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="correo@ejemplo.com"
                                             required
                                         />
@@ -411,17 +419,24 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Contraseña</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Contraseña</label>
                                     <div className="relative group">
                                         <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-12 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="••••••••"
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4F6FFF] transition-colors"
+                                        >
+                                            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -431,9 +446,9 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                             type="checkbox"
                                             checked={rememberMe}
                                             onChange={(e) => setRememberMe(e.target.checked)}
-                                            className="w-4 h-4 text-[#4F6FFF] border-gray-300 rounded focus:ring-[#4F6FFF]"
+                                            className="w-4 h-4 text-[#4F6FFF] border-gray-300 dark:border-white/20 rounded focus:ring-[#4F6FFF] dark:bg-white/5"
                                         />
-                                        <span className="ml-2 text-gray-600">Recordarme</span>
+                                        <span className="ml-2 text-gray-600 dark:text-gray-400">Recordarme</span>
                                     </label>
                                     <button
                                         type="button"
@@ -463,14 +478,14 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                         {view === 'register-step1' && (
                             <form onSubmit={handleRegisterStep1} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Nombre completo</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Nombre completo</label>
                                     <div className="relative group">
                                         <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
                                             type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Juan Pérez"
                                             required
                                         />
@@ -478,14 +493,14 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Correo electrónico</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Correo electrónico</label>
                                     <div className="relative group">
                                         <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="correo@ejemplo.com"
                                             required
                                         />
@@ -493,17 +508,24 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Contraseña</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Contraseña</label>
                                     <div className="relative group">
                                         <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-12 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Mínimo 6 caracteres"
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4F6FFF] transition-colors"
+                                        >
+                                            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -527,7 +549,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                     <select
                                         value={selectedQuestion}
                                         onChange={(e) => setSelectedQuestion(e.target.value)}
-                                        className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 appearance-none cursor-pointer"
+                                        className="w-full px-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white appearance-none cursor-pointer"
                                         required
                                     >
                                         <option value="">-- Elige una pregunta --</option>
@@ -538,14 +560,14 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Tu respuesta</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Tu respuesta</label>
                                     <div className="relative group">
                                         <FiShield className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
                                             type="text"
                                             value={securityAnswer}
                                             onChange={(e) => setSecurityAnswer(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Escribe tu respuesta..."
                                             required
                                         />
@@ -574,14 +596,14 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                         {view === 'recover-step1' && (
                             <form onSubmit={handleRecoverStep1} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Usuario o correo</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Usuario o correo</label>
                                     <div className="relative group">
                                         <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
                                             type="text"
                                             value={recoverUsername}
                                             onChange={(e) => setRecoverUsername(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Tu usuario o correo electrónico"
                                             required
                                         />
@@ -606,20 +628,20 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                         {/* === RECOVER STEP 2 (Responder pregunta) === */}
                         {view === 'recover-step2' && (
                             <form onSubmit={handleRecoverStep2} className="space-y-5">
-                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                                    <p className="text-sm font-semibold text-blue-800 mb-1">Tu pregunta de seguridad:</p>
-                                    <p className="text-blue-700 font-medium">{recoverQuestion}</p>
+                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                                    <p className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1">Tu pregunta de seguridad:</p>
+                                    <p className="text-blue-700 dark:text-blue-400 font-medium">{recoverQuestion}</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Tu respuesta</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Tu respuesta</label>
                                     <div className="relative group">
                                         <FiShield className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
                                             type="text"
                                             value={recoverAnswer}
                                             onChange={(e) => setRecoverAnswer(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Escribe tu respuesta..."
                                             autoFocus
                                             required
@@ -646,32 +668,46 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                         {view === 'recover-step3' && (
                             <form onSubmit={handleRecoverStep3} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Nueva contraseña</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Nueva contraseña</label>
                                     <div className="relative group">
                                         <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
-                                            type="password"
+                                            type={showNewPassword ? "text" : "password"}
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-12 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Mínimo 6 caracteres"
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4F6FFF] transition-colors"
+                                        >
+                                            {showNewPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2 pl-1">Confirmar contraseña</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2 pl-1">Confirmar contraseña</label>
                                     <div className="relative group">
                                         <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#4F6FFF]" size={20} />
                                         <input
-                                            type="password"
+                                            type={showConfirmPassword ? "text" : "password"}
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900"
+                                            className="w-full pl-12 pr-12 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-[#4F6FFF]/50 focus:border-transparent transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                             placeholder="Repite la contraseña"
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4F6FFF] transition-colors"
+                                        >
+                                            {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -715,7 +751,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                     {/* Footer */}
                     {(view === 'login' || view === 'register-step1') && (
                         <div className="px-8 pb-8 text-center">
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                 {view === 'login' ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?'}
                                 <button
                                     onClick={() => switchView(view === 'login' ? 'register-step1' : 'login')}
@@ -730,7 +766,7 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
                     {/* Footer para recovery */}
                     {view === 'recover-step1' && (
                         <div className="px-8 pb-8 text-center">
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                 ¿Recordaste tu contraseña?
                                 <button
                                     onClick={() => switchView('login')}

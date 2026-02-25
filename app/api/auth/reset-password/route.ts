@@ -21,10 +21,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Hash de la nueva contraseña
+
         const passwordHash = await hashPassword(newPassword);
 
-        // Actualizar contraseña del usuario
         await prisma.user.update({
             where: { id: userId },
             data: { passwordHash },

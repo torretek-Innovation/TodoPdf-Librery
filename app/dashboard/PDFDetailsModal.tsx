@@ -117,18 +117,6 @@ export default function PDFDetailsModal({ isOpen, onClose, pdf }: PDFDetailsModa
                                     <p className="font-semibold text-gray-800 dark:text-white">{pdf.size}</p>
                                 </div>
                             </div>
-
-                            <div className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl">
-                                <div className="p-3 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 rounded-xl">
-                                    <FiFileText size={24} />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Páginas</p>
-                                    <p className="font-semibold text-gray-800 dark:text-white">
-                                        {pdf.totalPages || 0} páginas
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 

@@ -16,18 +16,18 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Verificar si existe un token
+
     const token = getToken();
     const user = getUser();
 
     if (token) {
       if (user) {
-        // Prioritize username, then try to fallback to name or email
+
         const displayName = user.username || user.name || user.email?.split('@')[0] || 'Usuario';
         setUserName(displayName);
       }
 
-      // Fetch fresh profile data
+
       fetch('/api/user/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -39,11 +39,11 @@ export default function Home() {
         })
         .then(data => {
           if (data.username) setUserName(data.username);
-          // Use the avatar path from API if available
+
           if (data.avatarPath) {
             setUserImage(`${data.avatarPath}?t=${new Date().getTime()}`);
           } else {
-            // Fallback to default
+
             setUserImage('/uploads/avatars/user.png');
           }
         })
@@ -60,7 +60,7 @@ export default function Home() {
     setIsLoading(false);
   }, []);
 
-  // Mostrar un loading mientras se verifica
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Verificar que el usuario aún existe
+
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
         });

@@ -249,9 +249,6 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                                         </li>
                                     ))}
                                 </ul>
-                                <button onClick={onLoginClick} className="px-8 py-3 bg-white text-gray-900 rounded-xl font-bold hover:bg-gray-100 transition-colors">
-                                    Únete a la plataforma
-                                </button>
                             </div>
                             <div className="flex justify-center">
                                 <div className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/20 max-w-sm w-full">

@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { CiSettings } from 'react-icons/ci';
-import { FiSearch, FiBell, FiUser, FiLogOut, FiUpload, FiFolder, FiCheckCircle, FiAlertTriangle, FiLoader, FiX, FiFileText, FiHome, FiStar, FiGrid, FiCompass } from 'react-icons/fi';
+import { FiSearch, FiBell, FiUser, FiLogOut, FiUpload, FiFolder, FiCheckCircle, FiAlertTriangle, FiLoader, FiX, FiFileText, FiHome, FiStar, FiGrid, FiCompass, FiTrash2 } from 'react-icons/fi';
 import { AnimatePresence, motion } from 'framer-motion';
 import NotificationsDropdown, { Notification } from './NotificationsDropdown';
 import { useToast } from '../providers/ToastProvider';
@@ -38,6 +38,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
         { id: 'folders', title: 'Carpetas', keywords: ['carpetas', 'directorios', 'archivos', 'organizar'], icon: FiFolder, tab: 'folders' },
         { id: 'explore', title: 'Explorar / Librería', keywords: ['explorar', 'libreria', 'buscar', 'web'], icon: FiCompass, tab: 'explore' },
         { id: 'pdfs', title: 'Todos los PDFs', keywords: ['pdfs', 'todos', 'lista', 'documentos'], icon: FiGrid, tab: 'pdfs' },
+        { id: 'trash', title: 'Papelera / Basura', keywords: ['papelera', 'basura', 'eliminados', 'borrados', 'trash'], icon: FiTrash2, tab: 'trash' },
     ];
 
     // Repos
@@ -217,9 +218,7 @@ export default function Header({ userName, userImage, onPdfUploaded, onNavigate,
                 const { pdfjs } = await import('react-pdf');
 
                 // Configurar el worker dinámicamente aquí
-                if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-                    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-                }
+                pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
                 const arrayBuffer = await file.arrayBuffer();
                 const pdf = await pdfjs.getDocument(arrayBuffer).promise;
                 numPages = pdf.numPages;

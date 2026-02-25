@@ -12,11 +12,11 @@ export async function GET(request: NextRequest) {
 
         const categories = await prisma.category.findMany({
             where: { userId: user.id },
-            select: { name: true }, // Select only name to simplify
+            select: { name: true },
             orderBy: { name: 'asc' }
         });
 
-        // Extract names
+
         const categoryNames = categories.map(c => c.name);
 
         return NextResponse.json({ categories: categoryNames });
@@ -42,10 +42,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Eliminar la categoría
-        // Al eliminarla, los registros en PDFCategory se eliminarán por cascada si está configurado así,
-        // o deberíamos hacerlo manualmente. Asumo cascada o limpieza manual.
-        // Pero primero busquemos la categoría para obtener su ID
+
         const category = await prisma.category.findFirst({
             where: {
                 userId: user.id,
@@ -54,7 +51,7 @@ export async function DELETE(request: NextRequest) {
         });
 
         if (category) {
-            // Eliminar relaciones primero (si no hay ON DELETE CASCADE)
+
             await prisma.pdfCategory.deleteMany({
                 where: { categoryId: category.id }
             });

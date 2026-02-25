@@ -13,10 +13,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Falta la URL de la carpeta' }, { status: 400 });
         }
 
-        // Extraer ID de la carpeta
-        // Formatos comunes: 
-        // https://drive.google.com/drive/folders/1abc...
-        // https://drive.google.com/drive/u/0/folders/1abc...
+
         const match = folderUrl.match(/folders\/([-a-zA-Z0-9_]+)/);
         const folderId = match ? match[1] : null;
 
@@ -24,12 +21,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'URL de Google Drive inválida' }, { status: 400 });
         }
 
-        // Ruta al script de Python
+
         const scriptPath = join(process.cwd(), 'scripts', 'scan_drive.py');
 
-        // Ejecutar script
-        // Nota: Asume que python está en el PATH. Puede ser 'python3' en Linux/Mac.
-        // Se pasa el folderId como argumento
+
         const command = `python "${scriptPath}" "${folderId}"`;
 
         console.log(`Ejecutando: ${command}`);
@@ -38,11 +33,11 @@ export async function POST(req: NextRequest) {
 
         if (stderr) {
             console.error(`Python stderr: ${stderr}`);
-            // Python logs warnings to stderr sometimes, so we check if stdout is empty
+
         }
 
         try {
-            // El script debe imprimir SOLO el JSON resultante en stdout
+
             const result = JSON.parse(stdout);
             return NextResponse.json(result);
         } catch (parseError) {

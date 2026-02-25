@@ -8,7 +8,7 @@ import { getToken } from '../lib/auth-utils';
 interface CreateFolderModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void;
+    onSuccess: (folderName: string) => void;
 }
 
 export default function CreateFolderModal({ isOpen, onClose, onSuccess }: CreateFolderModalProps) {
@@ -41,9 +41,10 @@ export default function CreateFolderModal({ isOpen, onClose, onSuccess }: Create
                 throw new Error(data.error || 'Error al crear carpeta');
             }
 
-            showToast(`Carpeta "${folderName}" creada exitosamente`, 'success');
+            const cleanName = folderName.trim();
+            showToast(`Carpeta "${cleanName}" creada exitosamente`, 'success');
             setFolderName('');
-            onSuccess();
+            onSuccess(cleanName);
             onClose();
         } catch (err: any) {
             showToast(err.message || 'Error al crear carpeta', 'error');

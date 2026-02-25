@@ -24,6 +24,8 @@ function createWindow() {
             : path.join(process.resourcesPath, 'public/logo/logo_with_letter.png')
     });
 
+    mainWindow.setMenu(null);
+
     const startUrl = isDev
         ? (process.env.ELECTRON_START_URL || `http://localhost:${PORT}`)
         : `http://localhost:${PORT}`;
@@ -72,28 +74,14 @@ const startServer = () => {
     const needsDbInit = !fs.existsSync(dbPath);
     const needsDbUpdate = existingVersion !== currentVersion && fs.existsSync(dbPath);
 
-    if (needsDbInit || needsDbUpdate) {
-        logStreamInit.write(`[${new Date().toISOString()}] DB init/update needed. ` +
-            `Current: ${currentVersion}, Previous: ${existingVersion || 'none'}, ` +
-            `DB exists: ${!needsDbInit}\n`);
-
+    if (needsDbInit) {
+        logStreamInit.write(`[${new Date().toISOString()}] Initializing fresh database for version ${currentVersion}\n`);
         try {
             const templateDbPath = isDev
                 ? path.join(__dirname, '../prisma/template.db')
                 : path.join(process.resourcesPath, 'database/template.db');
 
             if (fs.existsSync(templateDbPath)) {
-                // Backup old DB before replacing (in case of version update)
-                if (needsDbUpdate) {
-                    const backupPath = path.join(userDataPath, `database_backup_${existingVersion}.sqlite`);
-                    try {
-                        fs.copyFileSync(dbPath, backupPath);
-                        logStreamInit.write(`Old DB backed up to: ${backupPath}\n`);
-                    } catch (e) {
-                        logStreamInit.write(`Warning: Could not backup old DB: ${e.message}\n`);
-                    }
-                }
-
                 fs.copyFileSync(templateDbPath, dbPath);
                 fs.writeFileSync(versionFilePath, currentVersion, 'utf-8');
                 logStreamInit.write(`Database initialized from template (v${currentVersion})\n`);
@@ -103,6 +91,12 @@ const startServer = () => {
         } catch (error) {
             logStreamInit.write(`ERROR initializing database: ${error.message}\n`);
         }
+    } else if (needsDbUpdate) {
+        logStreamInit.write(`[${new Date().toISOString()}] App updated from ${existingVersion} to ${currentVersion}. Data preserved.\n`);
+        // Aquí actualizamos el archivo de versión para que no vuelva a entrar en este bloque
+        fs.writeFileSync(versionFilePath, currentVersion, 'utf-8');
+        // NOTA: En el futuro, si cambias el schema de la base de datos, 
+        // aquí es donde ejecutarías un "prisma migrate deploy"
     }
     const storageDir = path.join(userDataPath, 'uploads');
     const serverLogPath = path.join(userDataPath, 'server.log');

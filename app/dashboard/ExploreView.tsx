@@ -40,7 +40,7 @@ interface SavedLibrary {
     createdAt: string;
 }
 
-export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void }) {
+export default function ExploreView({ onPdfAdded }: { onPdfAdded?: (pdf: any) => void }) {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [url, setUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -294,9 +294,10 @@ export default function ExploreView({ onPdfAdded }: { onPdfAdded?: () => void })
             });
 
             if (!res.ok) throw new Error('Error al importar');
+            const result = await res.json();
 
             showToast(`✅ "${pdf.name}" se agregó a tu biblioteca`, 'success');
-            if (onPdfAdded) onPdfAdded();
+            if (onPdfAdded) onPdfAdded(result.pdf);
         } catch (err: any) {
             showToast(err.message || 'Error al importar', 'error');
         } finally {

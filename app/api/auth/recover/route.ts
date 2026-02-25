@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { step, username, answer } = body;
 
-        // PASO 1: Buscar usuario y retornar la pregunta de seguridad
+
         if (step === 'find-user') {
             if (!username) {
                 return NextResponse.json(
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // PASO 2: Verificar la respuesta de seguridad
+
         if (step === 'verify-answer') {
             const { userId } = body;
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            // Normalizar respuesta y comparar
+
             const normalizedAnswer = answer.trim().toLowerCase();
             const isValid = await bcrypt.compare(normalizedAnswer, securityQuestion.answerHash);
 

@@ -23,7 +23,7 @@ interface PDF {
 }
 
 interface TrashViewProps {
-    onRestore: () => void;
+    onRestore: (pdf?: any) => void;
 }
 
 export default function TrashView({ onRestore }: TrashViewProps) {
@@ -65,9 +65,12 @@ export default function TrashView({ onRestore }: TrashViewProps) {
             });
 
             if (response.ok) {
+                const data = await response.json();
                 showToast('PDF restaurado correctamente', 'success');
                 setTrashedPdfs(prev => prev.filter(pdf => pdf.id !== pdfId));
-                onRestore();
+
+                // If the API returns the restored PDF, pass it back if possible
+                onRestore(data.pdf);
             } else {
                 showToast('Error al restaurar el PDF', 'error');
             }

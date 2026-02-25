@@ -8,9 +8,10 @@ interface SidebarProps {
     isCollapsed: boolean;
     onToggle: () => void;
     onOpenSettings: () => void;
+    version?: string;
 }
 
-export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle, onOpenSettings }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle, onOpenSettings, version = '1.0.0' }: SidebarProps) {
     const menuItems = [
         { id: 'home', label: 'Inicio', icon: FiHome },
         { id: 'pdfs', label: 'Libros', icon: FiFile },
@@ -108,6 +109,13 @@ export default function Sidebar({ activeTab, onTabChange, isCollapsed, onToggle,
                         </div>
                     )}
                 </button>
+            </div>
+
+            {/* Version */}
+            <div className={`mt-4 px-3 flex ${isCollapsed ? 'justify-center' : 'justify-start px-6'} pb-2`}>
+                <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                    {isCollapsed ? `v${version}` : `Versión ${version}`}
+                </span>
             </div>
         </aside>
     );

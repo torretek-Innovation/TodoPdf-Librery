@@ -16,7 +16,7 @@ interface MoveToPDFsModalProps {
     onClose: () => void;
     pdfs: PDF[];
     targetFolder: string;
-    onSuccess: () => void;
+    onSuccess: (pdfIds: string[]) => void;
 }
 
 export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onSuccess }: MoveToPDFsModalProps) {
@@ -55,7 +55,7 @@ export default function MovePDFsModal({ isOpen, onClose, pdfs, targetFolder, onS
             if (!res.ok) throw new Error('Error al mover archivos');
 
             showToast(`${selectedPdfs.length} archivo(s) movido(s) a "${targetFolder}"`, 'success');
-            onSuccess();
+            onSuccess(selectedPdfs);
             onClose();
         } catch (err: any) {
             showToast(err.message || 'Error al mover archivos', 'error');

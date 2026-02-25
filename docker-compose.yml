@@ -1,0 +1,22 @@
+services:
+  app:
+    image: torretekinnovation/todo-pdf:latest
+    container_name: todo-pdf-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+
+      - DATABASE_URL=file:/app/prisma/dev.db
+
+      - JWT_SECRET=tu_clave_secreta_super_segura_cambiala_en_produccion_12345
+
+      - PORT=3000
+    volumes:
+
+      - todo-pdf-data:/app/prisma
+      - todo-pdf-public:/app/public
+
+volumes:
+  todo-pdf-data:
+  todo-pdf-public:

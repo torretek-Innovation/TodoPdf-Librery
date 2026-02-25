@@ -9,7 +9,7 @@ interface RenameFolderModalProps {
     isOpen: boolean;
     onClose: () => void;
     currentName: string;
-    onSuccess: () => void;
+    onSuccess: (newName: string) => void;
 }
 
 export default function RenameFolderModal({ isOpen, onClose, currentName, onSuccess }: RenameFolderModalProps) {
@@ -26,12 +26,13 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
     if (!isOpen) return null;
 
     const handleRename = async () => {
-        if (!newName.trim()) {
+        const trimmedNewName = newName.trim();
+        if (!trimmedNewName) {
             showToast('Ingresa un nombre para la carpeta', 'error');
             return;
         }
 
-        if (newName.trim() === currentName) {
+        if (trimmedNewName === currentName) {
             onClose();
             return;
         }
@@ -44,15 +45,15 @@ export default function RenameFolderModal({ isOpen, onClose, currentName, onSucc
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${getToken()}`
                 },
-                body: JSON.stringify({ newName: newName.trim() })
+                body: JSON.stringify({ newName: trimmedNewName })
             });
 
             if (!res.ok) {
                 throw new Error('Error al renombrar carpeta');
             }
 
-            showToast(`Carpeta renombrada a "${newName}"`, 'success');
-            onSuccess();
+            showToast(`Carpeta renombrada a "${trimmedNewName}"`, 'success');
+            onSuccess(trimmedNewName);
             onClose();
         } catch (err: any) {
             showToast(err.message || 'Error al renombrar carpeta', 'error');

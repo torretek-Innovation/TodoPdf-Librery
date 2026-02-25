@@ -31,20 +31,23 @@ export async function POST(req: NextRequest) {
 
         const buffer = Buffer.from(await response.arrayBuffer());
 
-        // Save locally
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'pdfs');
-        await mkdir(uploadDir, { recursive: true });
+        // Usar utilidades de almacenamiento centralizadas
+        const { ensureStorageDirectory, getFileUrl } = await import('@/lib/storage-utils');
+        const uploadDir = await ensureStorageDirectory('pdfs');
 
         const fileName = `${Date.now()}-${title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
         const filePath = path.join(uploadDir, fileName);
         await writeFile(filePath, buffer);
+
+        // Generar URL pública correcta para la BD
+        const dbFilePath = getFileUrl(fileName, 'pdfs');
 
         // Save to DB
         const pdf = await prisma.pdf.create({
             data: {
                 userId,
                 title: title,
-                filePath: `/uploads/pdfs/${fileName}`,
+                filePath: dbFilePath,
                 size: buffer.length,
                 totalPages: 0,
                 folderName: 'Descargas Externas',

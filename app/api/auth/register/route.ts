@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { username, email, password, securityQuestion, securityAnswer } = body;
 
-        // Validaciones
+
         if (!username || !password || !email) {
             return NextResponse.json(
                 { error: 'Todos los campos son requeridos' },
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verificar si el usuario o email ya existe
+
         const existingUser = await prisma.user.findFirst({
             where: {
                 OR: [
@@ -46,14 +46,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Hash de la contraseña
+
         const passwordHash = await hashPassword(password);
 
-        // Hash de la respuesta de seguridad (normalizada a minúsculas y sin espacios extra)
+
         const normalizedAnswer = securityAnswer.trim().toLowerCase();
         const answerHash = await hashPassword(normalizedAnswer);
 
-        // Crear usuario con pregunta de seguridad
+
         const user = await prisma.user.create({
             data: {
                 username,
@@ -68,13 +68,13 @@ export async function POST(request: NextRequest) {
             },
         });
 
-        // Generar token JWT
+
         const token = generateToken({
             userId: user.id,
             email: user.email || user.username,
         });
 
-        // Retornar usuario y token
+
         return NextResponse.json(
             {
                 message: 'Usuario creado exitosamente',

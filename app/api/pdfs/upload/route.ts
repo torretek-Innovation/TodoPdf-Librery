@@ -10,8 +10,18 @@ const prisma = new PrismaClient();
 // Función para obtener el número de páginas de un PDF
 async function getPdfPageCount(buffer: Buffer): Promise<number> {
     try {
-        const pdfParse = require('pdf-parse');
+        // Método 1: Búsqueda binaria rápida de objetos de tipo /Page
+        // Es muy eficiente y no requiere cargar bibliotecas de renderizado que fallan en Node.js
+        const pdfContent = buffer.toString('binary');
+        const pageCount = (pdfContent.match(/\/Type\s*\/Page\b/g) || []).length;
 
+        if (pageCount > 0) {
+            console.log(`✅ Páginas detectadas via Regex en servidor: ${pageCount}`);
+            return pageCount;
+        }
+
+        // Método 2: pdf-parse como fallback (puede fallar si intenta renderizar)
+        const pdfParse = require('pdf-parse');
         const data = await pdfParse(buffer);
         return data.numpages;
     } catch (error) {

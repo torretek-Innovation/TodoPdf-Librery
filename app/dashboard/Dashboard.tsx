@@ -33,6 +33,8 @@ const PDFViewer = dynamic(() => import('./PDFViewer'), {
     ),
 });
 
+import { version } from '../../package.json';
+
 interface DashboardProps {
     userName: string;
     userImage?: string;
@@ -95,6 +97,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
             if (response.ok) {
                 // Eliminar del estado local
                 setPdfs(prevPdfs => prevPdfs.filter(pdf => pdf.id !== pdfId));
+                setAllPdfs(prev => prev.filter(pdf => pdf.id !== pdfId));
 
                 // Cerrar visor si el PDF eliminado estaba abierto
                 if (selectedPdf?.id === pdfId) {
@@ -161,6 +164,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
     // Callback para cuando se sube un nuevo PDF
     const handlePdfUploaded = (newPdf: PDF) => {
         setPdfs(prevPdfs => [...prevPdfs, newPdf]);
+        setAllPdfs(prev => [...prev, newPdf]);
     };
 
     // Función para actualizar un PDF
@@ -184,13 +188,12 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                 console.log('Datos recibidos:', data);
 
                 // Actualizar el estado local
-                setPdfs(prevPdfs =>
-                    prevPdfs.map(pdf =>
-                        pdf.id === pdfId
-                            ? { ...pdf, ...updatedData }
-                            : pdf
-                    )
-                );
+                const updateFn = (pdf: PDF) =>
+                    pdf.id === pdfId
+                        ? { ...pdf, ...updatedData }
+                        : pdf;
+                setPdfs(prevPdfs => prevPdfs.map(updateFn));
+                setAllPdfs(prev => prev.map(updateFn));
                 return true;
             } else {
                 const errorData = await response.json();
@@ -245,9 +248,10 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
             const data = await res.json();
 
             if (data.success) {
-                setPdfs(prev => prev.map(pdf =>
-                    pdf.id === id ? { ...pdf, isFavorite: data.isFavorite } : pdf
-                ));
+                const updateFn = (pdf: PDF) =>
+                    pdf.id === id ? { ...pdf, isFavorite: data.isFavorite } : pdf;
+                setPdfs(prev => prev.map(updateFn));
+                setAllPdfs(prev => prev.map(updateFn));
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
@@ -258,6 +262,13 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
         if (!confirm(`¿Eliminar la carpeta "${folderName}" y todos sus archivos?`)) return;
 
         try {
+            // Optimistic update
+            const originalPdfs = [...pdfs];
+            const originalAllPdfs = [...allPdfs];
+
+            setPdfs(prev => prev.filter(pdf => pdf.folderName !== folderName));
+            setAllPdfs(prev => prev.filter(pdf => pdf.folderName !== folderName));
+
             const res = await fetch(`/api/folders/${encodeURIComponent(folderName)}`, {
                 method: 'DELETE',
                 headers: {
@@ -265,13 +276,46 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                 }
             });
 
-            if (!res.ok) throw new Error('Error al eliminar carpeta');
+            if (!res.ok) {
+                // Rollback on error
+                setPdfs(originalPdfs);
+                setAllPdfs(originalAllPdfs);
+                throw new Error('Error al eliminar carpeta');
+            }
 
             showToast(`Carpeta "${folderName}" eliminada`, 'success');
-            loadPDFs(); // Reload PDFs
         } catch (err: any) {
             showToast(err.message || 'Error al eliminar carpeta', 'error');
+            loadPDFs(); // Ensure sync on error
         }
+    };
+
+    // Helper to handle folder renaming locally
+    const handleFolderRenamed = (oldName: string, newName: string) => {
+        const updateFn = (pdf: PDF) => pdf.folderName === oldName ? { ...pdf, folderName: newName } : pdf;
+        setPdfs(prev => prev.map(updateFn));
+        setAllPdfs(prev => prev.map(updateFn));
+    };
+
+    // Helper to handle PDF movement locally
+    const handlePDFsMoved = (pdfIds: string[], folderName: string) => {
+        const updateFn = (pdf: PDF) => pdfIds.includes(pdf.id) ? { ...pdf, folderName } : pdf;
+        setPdfs(prev => prev.map(updateFn));
+        setAllPdfs(prev => prev.map(updateFn));
+    };
+
+    // Helper to handle folder creation locally
+    const handleFolderCreated = (folderName: string) => {
+        const placeholder: PDF = {
+            id: `temp-${Date.now()}`,
+            title: '.folder_placeholder',
+            fileName: '',
+            filePath: '',
+            uploadDate: new Date().toISOString(),
+            size: 0,
+            folderName
+        };
+        setAllPdfs(prev => [...prev, placeholder]);
     };
 
     // Filter Logic Helper
@@ -342,6 +386,7 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                     isCollapsed={isSidebarCollapsed}
                     onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                     onOpenSettings={() => setShowSettingsModal(true)}
+                    version={version}
                 />
 
                 <div className="flex-1 flex flex-col overflow-hidden">
@@ -361,11 +406,17 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
 
                     <main className="flex-1 overflow-y-auto p-6">
                         {activeTab === 'explore' ? (
-                            <ExploreView onPdfAdded={loadPDFs} />
+                            <ExploreView onPdfAdded={handlePdfUploaded} />
                         ) : activeTab === 'home' ? (
                             <StatsView pdfs={pdfs} userName={userName} />
                         ) : activeTab === 'trash' ? (
-                            <TrashView onRestore={loadPDFs} />
+                            <TrashView onRestore={(pdf) => {
+                                if (pdf) {
+                                    handlePdfUploaded(pdf);
+                                } else {
+                                    loadPDFs();
+                                }
+                            }} />
                         ) : (
                             <div className="max-w-7xl mx-auto">
                                 <div className="mb-6 flex items-center gap-4">
@@ -597,8 +648,8 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                     onClose={() => setShowMovePDFsModal(false)}
                     pdfs={pdfs}
                     targetFolder={selectedFolderForMove}
-                    onSuccess={() => {
-                        loadPDFs();
+                    onSuccess={(pdfIds) => {
+                        handlePDFsMoved(pdfIds, selectedFolderForMove);
                         setShowMovePDFsModal(false);
                     }}
                 />
@@ -607,8 +658,8 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                 <CreateFolderModal
                     isOpen={showCreateFolderModal}
                     onClose={() => setShowCreateFolderModal(false)}
-                    onSuccess={() => {
-                        loadPDFs();
+                    onSuccess={(folderName) => {
+                        handleFolderCreated(folderName);
                         setShowCreateFolderModal(false);
                     }}
                 />
@@ -618,8 +669,8 @@ export default function Dashboard({ userName, userImage, onUpdateUser, onUpdateU
                     isOpen={!!editingFolder}
                     onClose={() => setEditingFolder(null)}
                     currentName={editingFolder || ''}
-                    onSuccess={() => {
-                        loadPDFs();
+                    onSuccess={(newName) => {
+                        handleFolderRenamed(editingFolder || '', newName);
                         setEditingFolder(null);
                     }}
                 />
