@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { FiCheck, FiArrowRight, FiShield, FiLayout, FiDownload, FiServer, FiCode } from 'react-icons/fi';
+import { FiCheck, FiArrowRight, FiShield, FiLayout, FiDownload, FiServer, FiCode, FiGithub, FiCopy, FiExternalLink, FiTerminal } from 'react-icons/fi';
 
 interface LandingPageProps {
     onLoginClick: () => void;
 }
 
 export default function LandingPage({ onLoginClick }: LandingPageProps) {
+    const [copiedCommand, setCopiedCommand] = useState('');
+
     return (
         <div className="min-h-screen bg-white">
             {/* Navigation */}
@@ -19,6 +21,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                         </div>
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#features" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">Funciones</a>
+                            <a href="#docs" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">Documentación</a>
                             <a href="#about" className="text-gray-600 hover:text-purple-600 font-medium transition-colors">Acerca de</a>
                             <button
                                 onClick={onLoginClick}
@@ -225,6 +228,143 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                     </div>
                 </div>
             </section>
+
+            {/* Documentation & Deployment Section */}
+            <section id="docs" className="py-24 bg-gray-50 overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <span className="text-purple-600 font-bold tracking-wider uppercase text-sm">Documentación de Despliegue</span>
+                        <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-2">¿Quieres desplegarlo en tu servidor?</h2>
+                        <p className="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">
+                            Sigue estos pasos para tener tu propia instancia de TodoPDF funcionando en minutos usando Docker.
+                        </p>
+                    </div>
+
+                    <div className="grid lg:grid-cols-2 gap-12 text-left">
+                        {/* Steps & Commands */}
+                        <div className="space-y-8">
+                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden h-full">
+                                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                    <FiTerminal size={100} />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <FiTerminal size={18} />
+                                    </div>
+                                    Comandos de Instalación
+                                </h3>
+                                <div className="space-y-6">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-500 mb-2">1. Crea una carpeta para tu proyecto:</p>
+                                        <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm text-gray-300 flex justify-between items-center group">
+                                            <code className="truncate mr-2 text-blue-300">mkdir todo-pdf && cd todo-pdf</code>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText('mkdir todo-pdf && cd todo-pdf');
+                                                    setCopiedCommand('mkdir');
+                                                    setTimeout(() => setCopiedCommand(''), 2000);
+                                                }}
+                                                className="flex-shrink-0 text-gray-500 hover:text-white transition-colors p-1"
+                                                title="Copiar comando"
+                                            >
+                                                {copiedCommand === 'mkdir' ? <FiCheck className="text-green-400" /> : <FiCopy />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-500 mb-2">2. Una vez creado el archivo <span className="text-purple-600 font-semibold">docker-compose.yml</span>, lanza el servicio:</p>
+                                        <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm text-gray-300 flex justify-between items-center group">
+                                            <code className="text-green-300">docker compose up -d</code>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText('docker compose up -d');
+                                                    setCopiedCommand('up');
+                                                    setTimeout(() => setCopiedCommand(''), 2000);
+                                                }}
+                                                className="flex-shrink-0 text-gray-500 hover:text-white transition-colors p-1"
+                                                title="Copiar comando"
+                                            >
+                                                {copiedCommand === 'up' ? <FiCheck className="text-green-400" /> : <FiCopy />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mt-6">
+                                        <div className="flex gap-4">
+                                            <div className="flex-shrink-0 text-blue-500 mt-1">
+                                                <FiExternalLink size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-blue-900 font-bold mb-1">Repositorio Oficial</p>
+                                                <p className="text-blue-700 text-sm mb-4">Mira el código fuente, reporta errores o contribuye en GitHub.</p>
+                                                <a
+                                                    href="https://github.com/torretek-Innovation/TodoPdf-Librery"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95 group"
+                                                >
+                                                    <FiGithub className="group-hover:rotate-12 transition-transform" /> Ver en GitHub
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Docker Compose File Display */}
+                        <div className="relative group">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                            <div className="relative bg-[#0d1117] rounded-3xl overflow-hidden border border-gray-800 shadow-2xl">
+                                <div className="bg-[#161b22] px-6 py-4 flex justify-between items-center border-b border-gray-800">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex gap-1.5">
+                                            <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                                            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                                            <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+                                        </div>
+                                        <span className="ml-4 text-[10px] uppercase tracking-widest font-bold text-gray-500 font-mono">docker-compose.yml</span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const yaml = `services:\n  app:\n    image: torretekinnovation/todo-pdf:latest\n    container_name: todo-pdf-app\n    restart: always\n    ports:\n      - "3000:3000"\n    environment:\n      - DATABASE_URL=file:/app/prisma/dev.db\n      - JWT_SECRET=tu_clave_secreta_super_segura_cambiala_en_produccion_12345\n      - PORT=3000\n    volumes:\n      - todo-pdf-data:/app/prisma\n      - todo-pdf-public:/app/public\n\nvolumes:\n  todo-pdf-data:\n  todo-pdf-public:`;
+                                            navigator.clipboard.writeText(yaml);
+                                            setCopiedCommand('yaml');
+                                            setTimeout(() => setCopiedCommand(''), 2000);
+                                        }}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-semibold text-gray-300 transition-all border border-white/10 active:scale-95"
+                                    >
+                                        {copiedCommand === 'yaml' ? <FiCheck className="text-green-400" /> : <FiCopy />}
+                                        Copiar Código
+                                    </button>
+                                </div>
+                                <div className="p-6 overflow-x-auto min-h-[400px]">
+                                    <pre className="text-sm font-mono leading-relaxed text-gray-300">
+                                        <span className="text-blue-400">services</span>:<br />
+                                        &nbsp;&nbsp;<span className="text-purple-400">app</span>:<br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-300">image</span>: <span className="text-green-400">torretekinnovation/todo-pdf:latest</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-300">container_name</span>: <span className="text-green-400">todo-pdf-app</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-300">restart</span>: <span className="text-green-400">always</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-300">ports</span>:<br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span className="text-green-400">"3000:3000"</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-300">environment</span>:<br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span className="text-green-400">DATABASE_URL=file:/app/prisma/dev.db</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span className="text-green-400">JWT_SECRET=tu_clave_secreta_super_segura</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span className="text-green-400">PORT=3000</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-orange-300">volumes</span>:<br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span className="text-green-400">todo-pdf-data:/app/prisma</span><br />
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span className="text-green-400">todo-pdf-public:/app/public</span><br />
+                                        <br />
+                                        <span className="text-blue-400">volumes</span>:<br />
+                                        &nbsp;&nbsp;<span className="text-purple-400">todo-pdf-data</span>:<br />
+                                        &nbsp;&nbsp;<span className="text-purple-400">todo-pdf-public</span>:
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
 
             {/* About / Tech Section */}
             <section id="about" className="py-24 bg-white relative overflow-hidden">
